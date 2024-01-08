@@ -1,9 +1,13 @@
 ---
-title: "About"
+title: "About Emily"
 ---
 
-About this site
+Hi! I am Emily, a Year 3 Information Systems student majoring in Business Analytics with second major Data Science and Analytics.
 
-```{r}
-1 + 1
-```
+This website is part of my current course, IS415 Geospatial Analytics and Application, where I will be exploring geospatial analytics with R.
+
+Hope that this website will show all my works and beneficial for me to showcase the works I have done in terms of Geospatial analytics.
+
+Thank you! :)
+
+
