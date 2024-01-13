@@ -9,6 +9,7 @@ This is the course website of IS415. You will find my course work on this websit
 Hands-On Exercise:
 
 -   [Hands-on Exercise 1](https://is415-gaa-emilyaurelia.netlify.app/hands-on_ex/hands-on_ex01/hands-on_ex01)
+-   [Hands-on Exercise 2](https://is415-gaa-emilyaurelia.netlify.app/hands-on_ex/hands-on_ex02/hands-on_ex02)
 
 In-Class Exercise:
 
