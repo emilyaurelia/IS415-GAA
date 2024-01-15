@@ -1,6 +1,9 @@
 ---
 title: "Hands-on Exercise 2: Thematic Mapping and GeoVisualisation with R"
 author: "Emily Aurelia"
+format:
+  html:
+    toc-depth: 4
 execute: 
   warning: false #to remove the warning in the webpage
 date: "`r Sys.Date()`"
@@ -89,11 +92,9 @@ Prepare a data table with year 2020 values before a thematic map can be prepared
 -   TOTAL: all age group
 -   DEPENDENCY: the ratio between young and aged against economy active group
 
-1. Data Wrangling
+1.  Data Wrangling
 
-Functions used:
--   pivot_wider() of tidyr package
--   mutate(), filter(), group_by() and select() of dplyr package
+Functions used: - pivot_wider() of tidyr package - mutate(), filter(), group_by() and select() of dplyr package
 
 ```{r}
 popdata2020 <- popdata %>%
@@ -115,15 +116,17 @@ mutate(`DEPENDENCY` = (`YOUNG` + `AGED`)
        `ECONOMY ACTIVE`, `AGED`, 
        `TOTAL`, `DEPENDENCY`)
 ```
+
 ```{r}
 popdata
 ```
 
-2. Joining the attribute data and geospatial data
+2.  Joining the attribute data and geospatial data
 
 We need to make sure that the content of the data of PA and SZ with PLN_AREA_N and SUBZONE_N are the same since we want to combine the data in popdata2020 and mpsz together
 
 change the value of PA and SZ to uppercase to make it the same with PLN_AREA_N and SUBZONE_N:
+
 ```{r}
 popdata2020 <- popdata2020 %>%
   mutate_at(.vars = vars(PA, SZ), 
@@ -148,31 +151,30 @@ write_rds(mpsz_pop2020, "data/rds/mpszpop2020.rds")
 
 Choropleth map is used to show data that is based on spatial areas such as countries, provinces, states, counties or census units.
 
-There are two approaches that can be used to prepare thematic map using tmap:
--   Plotting a thematic map quickly by using qtm()
--   Plotting highly customisable thematic map by using tmap elements
+There are two approaches that can be used to prepare thematic map using tmap: - Plotting a thematic map quickly by using qtm() - Plotting highly customisable thematic map by using tmap elements
 
 #### Plotting a choropleth map quickly by using qtm()
 
 qtm() provides a good default visualization in many cases
 
 a cartographic standard choropleth map:
+
 ```{r}
 tmap_mode("plot")
 qtm(mpsz_pop2020, 
     fill = "DEPENDENCY")
 ```
 
-Learning Note:
--   tmap_mode() with "plot" option -> to produce a static map
+Learning Note: - tmap_mode() with "plot" option -\> to produce a static map
 
-    -   for interactive mode, use "view" option 
-    -   fill argument is used to map the attribute (i.e DEPENDENCY)
-    
+```         
+-   for interactive mode, use "view" option 
+-   fill argument is used to map the attribute (i.e DEPENDENCY)
+```
+
 #### Creating a choropleth map by using tmap's elements
 
-Disadvantage of qtm():
--   makes aesthetic of individual layers harder to control.
+Disadvantage of qtm(): - makes aesthetic of individual layers harder to control.
 
 tmap's drawing elements should be used to make a high quality cartographic choropleth map:
 
@@ -196,12 +198,9 @@ tm_shape(mpsz_pop2020)+
              position = c("left", "bottom"))
 ```
 
-1. Drawing a base map
+1.  Drawing a base map
 
-Basic building block of tmap:
--   tm_shape(): to define the input data 
--   (one or more) tm_fill(): 
--   (one or more) tm_polygons(): draw the planning subzone polygons
+Basic building block of tmap: - tm_shape(): to define the input data - (one or more) tm_fill(): - (one or more) tm_polygons(): draw the planning subzone polygons
 
 Base map:
 
@@ -210,25 +209,20 @@ tm_shape(mpsz_pop2020) +
   tm_polygons()
 ```
 
-2. Drawing a choropleth map using tm_polygons()
+2.  Drawing a choropleth map using tm_polygons()
 
-assign the target variable such as Dependency to tm_polygons()
--> to draw a choropleth map showing the geographical distribution os a selected variable by planning subzone
+assign the target variable such as Dependency to tm_polygons() -\> to draw a choropleth map showing the geographical distribution os a selected variable by planning subzone
 
 ```{r}
 tm_shape(mpsz_pop2020)+
   tm_polygons("DEPENDENCY")
 ```
 
-Learning Notes:
--   Default interval binning used to draw the choropleth map: "pretty
--   Default colour scheme used: YlOrRd of ColorBrewer
--   By default, missing values will be shaded in grey
+Learning Notes: - Default interval binning used to draw the choropleth map: "pretty - Default colour scheme used: YlOrRd of ColorBrewer - By default, missing values will be shaded in grey
 
-3. Drawing a choropleth map using tm_fill() and tm_border()
+3.  Drawing a choropleth map using tm_fill() and tm_border()
 
-tm_fill(): shades the polygons by using the default colour scheme
-tm_borders(): adds the borders of the shapefile onto the choropleth map
+tm_fill(): shades the polygons by using the default colour scheme tm_borders(): adds the borders of the shapefile onto the choropleth map
 
 ```{r}
 tm_shape(mpsz_pop2020)+
@@ -243,11 +237,7 @@ tm_shape(mpsz_pop2020)+
   tm_borders(lwd = 0.1,  alpha = 1)
 ```
 
-Arguments for tm_borders():
--   alpha: transparency between 0 (totally transparent) and 1 (not transparent); by default, the alpha value of the col is used
--   col: border colour
--   lwd: border line width, default is 1
--   lty: border line type, default is "solid"
+Arguments for tm_borders(): - alpha: transparency between 0 (totally transparent) and 1 (not transparent); by default, the alpha value of the col is used - col: border colour - lwd: border line width, default is 1 - lty: border line type, default is "solid"
 
 #### Data Classification methods of tmap
 
@@ -255,7 +245,7 @@ Ten data classification methods of tmap: fixed, sd, equal, pretty (default), qua
 
 style argument of tm_fill() or tm_polygons() is used to define a data classification method
 
-1. Plotting choropleth maps with built-in classification methods
+1.  Plotting choropleth maps with built-in classification methods
 
 a jenks data classification using 5 classes:
 
@@ -393,10 +383,9 @@ tm_shape(mpsz_pop2020)+
 
 The more the quantile or the classes, the more the color separation and the easier it is to classify which region has higher and lower dependency ratio
 
-2. Plotting choropleth map with custom break
+2.  Plotting choropleth map with custom break
 
-breaks argument to customize the breakpoints
---> to have n categories, n+1 elements must be specified in the breaks option (ascending order)
+breaks argument to customize the breakpoints --\> to have n categories, n+1 elements must be specified in the breaks option (ascending order)
 
 show descriptive statistics of DEPENDENCY field:
 
@@ -440,7 +429,7 @@ tm_shape(mpsz_pop2020)+
 
 ## Map Layouts
 
-Refers to the combination of all map elements into a cohesive map. 
+Refers to the combination of all map elements into a cohesive map.
 
 #### Map Legend
 
@@ -482,9 +471,7 @@ tm_shape(mpsz_pop2020)+
 
 to draw other map furniture such as compass, scale bar and grid lines
 
-tm_compass(): to show compass
-tm_scale_bar(): to show scale bar
-tm_grid(): to show grid lines for the map
+tm_compass(): to show compass tm_scale_bar(): to show scale bar tm_grid(): to show grid lines for the map
 
 ```{r}
 tm_shape(mpsz_pop2020)+
@@ -507,6 +494,7 @@ tm_shape(mpsz_pop2020)+
 ```
 
 to reset the style:
+
 ```{r}
 tmap_style("white")
 ```
@@ -515,14 +503,12 @@ tmap_style("white")
 
 Small multiple maps (facet maps): many maps, arranged side by side, sometimes stacked vertically
 
-Can be plotted in three ways:
--   assigning multiple values to at least one of the aesthetic arguments
--   defining a group-by variable in tm_facets
--   creating multiple stand-alone maps with tmap_arrange()
+Can be plotted in three ways: - assigning multiple values to at least one of the aesthetic arguments - defining a group-by variable in tm_facets - creating multiple stand-alone maps with tmap_arrange()
 
 #### By assigning multiple values to at least one of the aesthetic arguments
 
 defining ncols in tm_fill():
+
 ```{r}
 tm_shape(mpsz_pop2020)+
   tm_fill(c("YOUNG", "AGED"),
@@ -534,6 +520,7 @@ tm_shape(mpsz_pop2020)+
 ```
 
 assigning multiple values to at least one of the aesthetic arguments:
+
 ```{r}
 tm_shape(mpsz_pop2020)+ 
   tm_polygons(c("DEPENDENCY","AGED"),
@@ -545,6 +532,7 @@ tm_shape(mpsz_pop2020)+
 #### By defining a group-by variable in tm_facets()
 
 multiple small choropleth maps:
+
 ```{r}
 tm_shape(mpsz_pop2020) +
   tm_fill("DEPENDENCY",
@@ -563,6 +551,7 @@ tm_shape(mpsz_pop2020) +
 #### By creating multiple stand-alone maps with tmap_arrange()
 
 creating multiple stand-alone maps with tmap_arrange():
+
 ```{r}
 youngmap <- tm_shape(mpsz_pop2020)+ 
   tm_polygons("YOUNG", 
@@ -580,6 +569,7 @@ tmap_arrange(youngmap, agedmap, asp=1, ncol=2)
 ## Mapping Spatial Object Meeting a Selection Criterion
 
 use selection function to map spatial objects meeting the selection criterion:
+
 ```{r}
 tm_shape(mpsz_pop2020[mpsz_pop2020$REGION_N=="CENTRAL REGION", ])+
   tm_fill("DEPENDENCY", 
@@ -595,5 +585,3 @@ tm_shape(mpsz_pop2020[mpsz_pop2020$REGION_N=="CENTRAL REGION", ])+
             frame = FALSE) +
   tm_borders(alpha = 0.5)
 ```
-
-
