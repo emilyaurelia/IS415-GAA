@@ -13,4 +13,6 @@ Hands-On Exercise:
 
 In-Class Exercise:
 
+-   [In-Class Exercise 2](https://is415-gaa-emilyaurelia.netlify.app/in-class_ex/in-class_ex02/in-class_ex02)
+
 Take Home Exercise:
