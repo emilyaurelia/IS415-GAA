@@ -1,0 +1,7 @@
+---
+title: "In-Class Exercise 2"
+author: "Emily Aurelia"
+execute: 
+  warning: false #to remove the warning in the webpage
+date: "`r Sys.Date()`"
+---
