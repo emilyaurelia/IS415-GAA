@@ -10,6 +10,7 @@ Hands-On Exercise:
 
 -   [Hands-on Exercise 1](https://is415-gaa-emilyaurelia.netlify.app/hands-on_ex/hands-on_ex01/hands-on_ex01)
 -   [Hands-on Exercise 2](https://is415-gaa-emilyaurelia.netlify.app/hands-on_ex/hands-on_ex02/hands-on_ex02)
+-   [Hands-on Exercise 3](https://is415-gaa-emilyaurelia.netlify.app/hands-on_ex/hands-on_ex03/hands-on_ex03)
 
 In-Class Exercise:
 
