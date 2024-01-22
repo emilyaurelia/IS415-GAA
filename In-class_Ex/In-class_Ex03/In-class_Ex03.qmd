@@ -9,6 +9,7 @@ execute:
 date: "`r Sys.Date()`"
 ---
 
+# Review of Hands-On Exercise 3
 ```{r}
 pacman::p_load(maptools, sf, raster, spatstat, tmap, tidyverse)
 ```
@@ -75,5 +76,69 @@ plot(pg, main="PUNGOOL")
 plot(tm, main="TAMPINES")
 plot(ck, main="CHOA CHU KANG")
 plot(jw, main="JURONG WEST")
+```
+#In-Class Exercise 3
+
+```{r}
+pacman::p_load(sf, spNetwork, tmap, classInt, viridis, tidyverse)
+```
+
+```{r}
+network <- st_read(dsn="data/geospatial", layer = "Punggol_St")
+childcare <- st_read(dsn="data/geospatial", layer ="Punggol_CC")
+```
+
+```{r}
+tmap_mode('view')
+tm_shape(childcare) +
+  tm_dots() +
+  tm_shape(network) +
+  tm_lines()
+tmap_mode('plot')
+```
+
+```{r}
+lixels <- lixelize_lines(network, 750, mindist = 375)
+```
+
+```{r}
+samples <- lines_center(lixels)
+```
+
+
+```{r}
+densities <- nkde(network, # IMPORTANT
+                  events = childcare,
+                  w = rep(1, nrow(childcare)), #IMPORTANT
+                  samples = samples, #IMPORTANT
+                  kernel_name = 'quartic', #kernel methods
+                  bw = 300, #bandwith
+                  div = "bw",
+                  method = "simple",
+                  digits = 1,
+                  tol = 1,
+                  grid_shape= c(1, 1),
+                  max_depth = 8,
+                  agg = 5, #we aggregate events within a 5m radius(faster calculation)
+                  sparse = TRUE,
+                  verbose = FALSE)
+```
+
+```{r}
+samples$density <- densities
+lixels$density <- densities
+# rescaling to help the mapping
+samples$density <- samples$density*1000
+lixels$density <- lixels$density*1000
+```
+
+
+```{r}
+tmap_mode('view')
+tm_shape(lixels) +
+  tm_lines(col="density") +
+  tm_shape(childcare) +
+  tm_dots()
+
 ```
 
