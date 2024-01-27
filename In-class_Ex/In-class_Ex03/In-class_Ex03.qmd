@@ -139,6 +139,6 @@ tm_shape(lixels) +
   tm_lines(col="density") +
   tm_shape(childcare) +
   tm_dots()
-
+tmap_mode("plot")
 ```
 
