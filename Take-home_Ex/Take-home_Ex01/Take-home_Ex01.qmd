@@ -1,0 +1,38 @@
+---
+title: "Take-Home Exercise 1: Application of Spatial Point Patterns Analysis to discover the geographical distribution of Grab hailing services in Singapore"
+author: "Emily Aurelia"
+format:
+  html:
+    toc-depth: 4
+execute: 
+  warning: false #to remove the warning in the webpage
+date: "`r Sys.Date()`"
+---
+
+# Background
+
+With cities moving to
+
+# Import
+
+## Packages
+
+## Aspatial Data
+
+## Geospatial Data
+
+# Data Preprocessing
+
+## Aspatial Data
+
+## Geospatial Data
+
+# Exploratory Data Analysis
+
+## 
+
+# Kernel Density Estimation
+
+# Network Kernel Density Estimation (NKDE)
+
+# Temporal Network Kernel Density Estimation (TNKDE)

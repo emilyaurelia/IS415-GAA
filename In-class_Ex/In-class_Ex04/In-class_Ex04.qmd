@@ -1,0 +1,10 @@
+---
+title: "In-Class Exercise 4"
+author: "Emily Aurelia"
+format:
+  html:
+    toc-depth: 4
+execute: 
+  warning: false #to remove the warning in the webpage
+date: "`r Sys.Date()`"
+---
