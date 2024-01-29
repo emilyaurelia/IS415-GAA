@@ -8,3 +8,130 @@ execute:
   warning: false #to remove the warning in the webpage
 date: "`r Sys.Date()`"
 ---
+
+## Review of Hands on Exercise 4
+```{r}
+pacman::p_load(sf, spdep, tmap, tidyverse, knitr, GWmodel)
+```
+
+```{r}
+hunan <- st_read(dsn ="data", layer="Hunan")
+hunan2012 <- read_csv("data/Hunan_2012.csv")
+```
+```{r}
+hunan <- left_join(hunan, hunan2012) %>% select(1:4, 7, 15) #doesnt indicate the same column because have the same column name in both dataset
+```
+## Queens Method to find neighbours
+```{r}
+wm_q <- poly2nb(hunan, queen=TRUE)
+summary(wm_q)
+```
+When you interpret the average number of links, interpret it in integers.
+You can choose to run down or run up, will mean the same but must give the number in integers
+
+To get the ID of the neighbours
+```{r}
+wm_q[[1]]
+```
+To get the names of the neighbours
+```{r}
+hunan$County[wm_q[[1]]]
+```
+
+## Rooks Method to find neihgbours
+```{r}
+wm_r <- poly2nb(hunan, queen=FALSE)
+summary(wm_r)
+```
+ ## Distance Weight Matrices
+```{r}
+longitude <- map_dbl(hunan$geometry, ~st_centroid(.x)[[1]])
+latitude <- map_dbl(hunan$geometry, ~st_centroid(.x)[[2]])
+coords <- cbind(longitude, latitude)
+```
+
+Note: Don't sort the tables as the data will be different if you sort the table, thus you cannot combine the data as the combined longitude and latitude will be different. So extract the data with the raw table
+
+
+Calculate the distance to find the furthest distance possible (always round up to not miss any points)
+```{r}
+k1 <- knn2nb(knearneigh(coords))
+```
+```{r}
+#will derive the distance between the neighbour, when longlat = TRUE, use great distance projection so that the projection is according to the region, return in kilometer
+k1dists <- unlist(nbdists(k1, coords, longlat=TRUE)) 
+summary(k1dists)
+```
+To find the neighbours within the 62km radius
+
+```{r}
+wm_d62 <- dnearneigh(coords, 0, 62, longlat=TRUE) #to find the neighbour within the 62 km radius
+wm_d62
+```
+
+Find a specific number of neighbour
+```{r}
+knn6 <- knn2nb(knearneigh(coords, k=6)) #to find the number of neighbours indicated as the k value, will go quite further to find the neighbour
+```
+
+```{r}
+plot(hunan$geometry, border="lightgrey")
+plot(wm_d62, coords, add=TRUE)
+plot(k1, coords, add=TRUE, col="red", length=0.08)
+```
+
+## Row standardized
+```{r}
+rswm_q <- nb2listw(wm_q, style="W", zero.policy=TRUE)
+rswm_q
+```
+
+```{r}
+rswm_q$weights[10]
+```
+
+```{r}
+lag.list <- list(hunan$NAME_3, lag.listw(rswm_q, hunan$GDPPC))
+lag.res <- as.data.frame(lag.list)
+colnames(lag.res) <- c("NAME_3", "lag GDPPC")
+hunan <- left_join(hunan,lag.res)
+```
+
+## In Class Exercise
+```{r}
+pacman::p_load(sf, spdep,tmap, tidyverse, knitr, GWmodel)
+```
+
+```{r}
+hunan <- st_read(dsn = "data", layer="Hunan")
+hunan2012 <- read_csv("data/Hunan_2012.csv")
+hunan <- left_join(hunan, hunan2012) %>% select(1:4, 7, 15)
+```
+```{r}
+hunan_sp <- hunan %>% as_Spatial()
+```
+
+```{r}
+gwstat <- gwss(data = hunan_sp,
+               vars = "GDPPC", #vector variable name(s) to be summarized, can include more than one
+               bw = 6, #bandwidth used in weighting function
+               kernel = "bisquare", #function chosen (gaussian, exponential, bisquare, tricube, boxcar)
+              adaptive = TRUE, #if TRUE calculate an adaptive kernel where the bandwidth corresponds to the number of nearest neighbours; if FALSE, fixed kernel is found (bandwidth is a fixed distance)
+              longlat = T) #decimal degree when longlat=T, projected coordinate system when longlat=F
+```
+
+```{r}
+hunan_sp
+```
+```{r}
+gwstat
+```
+```{r}
+lm <- qtm(gwstat$SDF, "GDPPC_LM")
+lsd <- qtm(gwstat$SDF, "GDPPC_LSD")
+lvar <- qtm(gwstat$SDF, "GDPPC_LVar")
+lske <- qtm(gwstat$SDF, "GDPPC_LSKe")
+lcv <- qtm(gwstat$SDF, "GDPPC_LCV")
+tmap_arrange(lm, lsd, lvar, lske, lcv, ncol = 2)
+```
+

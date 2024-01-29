@@ -11,21 +11,99 @@ date: "`r Sys.Date()`"
 
 # Background
 
-With cities moving to
+With the growing of smart cities all over the world, it is important for the government to be able to know the movement of the people and see what they can do to make the lives of the people better. This requires data of the human mobility to know where people are moving from and to. As now we have the advancement of Information and Communication Technologies (ICT) like smart phones, smart watches, and GPS devices, we can acquire large volumes of data relating to human mobility. With this, we can better examine the movement of the people in the city and better plan and manage the architecture and services provided in the smart city.
+
+In this Take Home exercise, we will be applying appropriate spatial point patterns analysis methods to discover the geographical and spatio-temporal distribution of Grab hailing services locations in Singapore.
 
 # Import
 
 ## Packages
 
+-   **sf** - allows import, management, manipulation, analysis and processing of vector-based geospatial in R
+
+-   **spatstat** - offers a comprehensive set of tools for statistical analysis of spatial point patterns, will be used to perform 1st and 2nd-order spatial point patterns analysis and derive kernel density estimation (KDE) layer
+
+-   **raster** - reads, writes, manipulates, analyses and model for gridded spatial data, used to convert image output generate by spatstat into raster format
+
+-   **maptools** - provides a set of tools for manipulating geographic data, mainly use to convert spatial objects into ppp format of spatstat
+
+-   **tmap** - provides functions for plotting cartographic quality static point patterns maps or interactive maps by using leaflet API
+
+-   **readr** - for fast and efficient reading of rectangular data files
+
+-   **tidyr** - to easily reshape and tidy data, including functions for pivoting and gathering columns
+
+-   **dplyr** *-* useful for data manipulation, providing functions for filtering, summarizing, and transforming data frames
+
+-   **arrow** - enables efficient data interchange between different systems and languages by standardizing how data is represented in memory
+
+```{r}
+pacman::p_load(sf, spatstat, raster, maptools, tmap, tidyverse, arrow)
+```
+
 ## Aspatial Data
 
+-   [Grab-Posisi](https://engineering.grab.com/grab-posisi) - a dataset of Grab taxi location points
+
+```{r}
+grab <- open_dataset("data/aspatial/GrabPosisi") |> as_tibble()
+grab
+```
+
 ## Geospatial Data
+
+-   [Road data set from OpenStreetMap](https://download.geofabrik.de/) (Malaysia, Singapore, and Brunei coverage)
+
+```{r}
+#| code-summary: "Read the road layer using st_read()"
+road <- st_read(dsn = "data/geospatial/malaysia-singapore-brunei-latest-free.shp", layer = "gis_osm_roads_free_1")
+```
+
+-   [Master Plan 2019 Subzone Boundary (No Sea)](https://beta.data.gov.sg/collections/1749/view)
+
+```{r}
+#| code-summary: "Read the Master Plan 2019 Subzone Boundary layer using st_read()"
+mpsz2019 <- st_read("data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson")
+```
 
 # Data Preprocessing
 
 ## Aspatial Data
 
 ## Geospatial Data
+
+**Check the projection layers of the Road and the Master Plan 2019 Subzone Boundary**
+
+::: {.panel-tabset}
+### road
+```{r}
+#| code-summary: "Check the projection for road layer"
+st_crs(road)
+```
+### mpsz2019
+```{r}
+#| code-summary: "Check the projection for mpsz2019 layer"
+st_crs(mpsz2019)
+```
+
+:::
+
+From the result of the code above, we can see that both of the data have the same projection, which is WGS 84 with the CRS of EPSG 4326.
+
+```{r}
+mpsz_new <- st_set_crs(mpsz2019, 3414)
+road_new <- st_set_crs(road, 3414)
+sg_boundary <- st_union(mpsz_new)
+
+```
+```{r}
+sg_road <- st_filter(road_new, sg_boundary, .pred = st_intersects)
+plot(sg_road["geometry"])
+```
+```{r}
+saveRDS(sg_road, file = "sg_road.rds")
+```
+
 
 # Exploratory Data Analysis
 

@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Emily Aurelia">
+<meta name="dcterms.date" content="2024-01-29">
 
 <title>IS415-GAA - Take-Home Exercise 1: Application of Spatial Point Patterns Analysis to discover the geographical distribution of Grab hailing services in Singapore</title>
 <style>
@@ -20,6 +21,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -205,7 +240,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">Invalid Date</p>
+      <p class="date">January 29, 2024</p>
     </div>
   </div>
   
@@ -217,18 +252,89 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="background" class="level1">
 <h1>Background</h1>
-<p>With cities moving to</p>
+<p>With the growing of smart cities all over the world, it is important for the government to be able to know the movement of the people and see what they can do to make the lives of the people better. This requires data of the human mobility to know where people are moving from and to. As now we have the advancement of Information and Communication Technologies (ICT) like smart phones, smart watches, and GPS devices, we can acquire large volumes of data relating to human mobility. With this, we can better examine the movement of the people in the city and better plan and manage the architecture and services provided in the smart city.</p>
+<p>In this Take Home exercise, we will be applying appropriate spatial point patterns analysis methods to discover the geographical and spatio-temporal distribution of Grab hailing services locations in Singapore.</p>
 </section>
 <section id="import" class="level1">
 <h1>Import</h1>
 <section id="packages" class="level2">
 <h2 class="anchored" data-anchor-id="packages">Packages</h2>
+<ul>
+<li><p><strong>sf</strong> - allows import, management, manipulation, analysis and processing of vector-based geospatial in R</p></li>
+<li><p><strong>spatstat</strong> - offers a comprehensive set of tools for statistical analysis of spatial point patterns, will be used to perform 1st and 2nd-order spatial point patterns analysis and derive kernel density estimation (KDE) layer</p></li>
+<li><p><strong>raster</strong> - reads, writes, manipulates, analyses and model for gridded spatial data, used to convert image output generate by spatstat into raster format</p></li>
+<li><p><strong>maptools</strong> - provides a set of tools for manipulating geographic data, mainly use to convert spatial objects into ppp format of spatstat</p></li>
+<li><p><strong>tmap</strong> - provides functions for plotting cartographic quality static point patterns maps or interactive maps by using leaflet API</p></li>
+<li><p><strong>readr</strong> - for fast and efficient reading of rectangular data files</p></li>
+<li><p><strong>tidyr</strong> - to easily reshape and tidy data, including functions for pivoting and gathering columns</p></li>
+<li><p><strong>dplyr</strong> <em>-</em> useful for data manipulation, providing functions for filtering, summarizing, and transforming data frames</p></li>
+<li><p><strong>arrow</strong> - enables efficient data interchange between different systems and languages by standardizing how data is represented in memory</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, spatstat, raster, maptools, tmap, tidyverse, arrow)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 <section id="aspatial-data" class="level2">
 <h2 class="anchored" data-anchor-id="aspatial-data">Aspatial Data</h2>
+<ul>
+<li><a href="https://engineering.grab.com/grab-posisi">Grab-Posisi</a> - a dataset of Grab taxi location points</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>grab <span class="ot">&lt;-</span> <span class="fu">open_dataset</span>(<span class="st">"data/aspatial/GrabPosisi"</span>) <span class="sc">|&gt;</span> <span class="fu">as_tibble</span>()</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>grab</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 30,329,685 × 9
+   trj_id driving_mode osname pingtimestamp rawlat rawlng speed bearing accuracy
+   &lt;chr&gt;  &lt;chr&gt;        &lt;chr&gt;          &lt;int&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;   &lt;int&gt;    &lt;dbl&gt;
+ 1 70014  car          andro…    1554943236   1.34   104. 18.9      248     3.9 
+ 2 73573  car          andro…    1555582623   1.32   104. 17.7       44     4   
+ 3 75567  car          andro…    1555141026   1.33   104. 14.0       34     3.9 
+ 4 1410   car          andro…    1555731693   1.26   104. 13.0      181     4   
+ 5 4354   car          andro…    1555584497   1.28   104. 14.8       93     3.9 
+ 6 32630  car          andro…    1555395258   1.30   104. 23.2       73     3.9 
+ 7 64631  car          andro…    1554768955   1.35   104.  0         82     3   
+ 8 76484  car          andro…    1554783532   1.34   104.  3.98     321     3.65
+ 9 65747  car          ios       1554898418   1.29   104.  4.68     324    50   
+10 60478  car          ios       1555593189   1.33   104. 16.5       31    16   
+# ℹ 30,329,675 more rows</code></pre>
+</div>
+</div>
 </section>
 <section id="geospatial-data" class="level2">
 <h2 class="anchored" data-anchor-id="geospatial-data">Geospatial Data</h2>
+<ul>
+<li><a href="https://download.geofabrik.de/">Road data set from OpenStreetMap</a> (Malaysia, Singapore, and Brunei coverage)</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>road <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/geospatial/malaysia-singapore-brunei-latest-free.shp"</span>, <span class="at">layer =</span> <span class="st">"gis_osm_roads_free_1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `gis_osm_roads_free_1' from data source 
+  `C:\emilyaurelia\IS415-GAA\Take-home_Ex\Take-home_Ex01\data\geospatial\malaysia-singapore-brunei-latest-free.shp' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 1759836 features and 10 fields
+Geometry type: LINESTRING
+Dimension:     XY
+Bounding box:  xmin: 99.66041 ymin: 0.8021131 xmax: 119.2601 ymax: 7.514393
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+</div>
+<ul>
+<li><a href="https://beta.data.gov.sg/collections/1749/view">Master Plan 2019 Subzone Boundary (No Sea)</a></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>mpsz2019 <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `MasterPlan2019SubzoneBoundaryNoSeaGEOJSON' from data source 
+  `C:\emilyaurelia\IS415-GAA\Take-home_Ex\Take-home_Ex01\data\geospatial\MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson' 
+  using driver `GeoJSON'
+Simple feature collection with 332 features and 2 fields
+Geometry type: MULTIPOLYGON
+Dimension:     XY, XYZ
+Bounding box:  xmin: 103.6057 ymin: 1.158699 xmax: 104.0885 ymax: 1.470775
+z_range:       zmin: 0 zmax: 0
+Geodetic CRS:  WGS 84</code></pre>
+</div>
+</div>
 </section>
 </section>
 <section id="data-preprocessing" class="level1">
@@ -238,6 +344,76 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="geospatial-data-1" class="level2">
 <h2 class="anchored" data-anchor-id="geospatial-data-1">Geospatial Data</h2>
+<p><strong>Check the projection layers of the Road and the Master Plan 2019 Subzone Boundary</strong></p>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">road</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">mpsz2019</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(road)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Coordinate Reference System:
+  User input: WGS 84 
+  wkt:
+GEOGCRS["WGS 84",
+    DATUM["World Geodetic System 1984",
+        ELLIPSOID["WGS 84",6378137,298.257223563,
+            LENGTHUNIT["metre",1]]],
+    PRIMEM["Greenwich",0,
+        ANGLEUNIT["degree",0.0174532925199433]],
+    CS[ellipsoidal,2],
+        AXIS["latitude",north,
+            ORDER[1],
+            ANGLEUNIT["degree",0.0174532925199433]],
+        AXIS["longitude",east,
+            ORDER[2],
+            ANGLEUNIT["degree",0.0174532925199433]],
+    ID["EPSG",4326]]</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(mpsz2019)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Coordinate Reference System:
+  User input: WGS 84 
+  wkt:
+GEOGCRS["WGS 84",
+    DATUM["World Geodetic System 1984",
+        ELLIPSOID["WGS 84",6378137,298.257223563,
+            LENGTHUNIT["metre",1]]],
+    PRIMEM["Greenwich",0,
+        ANGLEUNIT["degree",0.0174532925199433]],
+    CS[ellipsoidal,2],
+        AXIS["geodetic latitude (Lat)",north,
+            ORDER[1],
+            ANGLEUNIT["degree",0.0174532925199433]],
+        AXIS["geodetic longitude (Lon)",east,
+            ORDER[2],
+            ANGLEUNIT["degree",0.0174532925199433]],
+    ID["EPSG",4326]]</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>From the result of the code above, we can see that both of the data have the same projection, which is WGS 84 with the CRS of EPSG 4326.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>mpsz_new <span class="ot">&lt;-</span> <span class="fu">st_set_crs</span>(mpsz2019, <span class="dv">3414</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>road_new <span class="ot">&lt;-</span> <span class="fu">st_set_crs</span>(road, <span class="dv">3414</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>sg_boundary <span class="ot">&lt;-</span> <span class="fu">st_union</span>(mpsz_new)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>sg_road <span class="ot">&lt;-</span> <span class="fu">st_filter</span>(road_new, sg_boundary, <span class="at">.pred =</span> st_intersects)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sg_road[<span class="st">"geometry"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(sg_road, <span class="at">file =</span> <span class="st">"sg_road.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 </section>
 <section id="exploratory-data-analysis" class="level1">
