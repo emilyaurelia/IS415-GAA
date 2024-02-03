@@ -10,6 +10,7 @@ date: "`r Sys.Date()`"
 ---
 
 # Review of Hands-On Exercise 3
+
 ```{r}
 pacman::p_load(maptools, sf, raster, spatstat, tmap, tidyverse)
 ```
@@ -20,9 +21,11 @@ sg_sf <- st_read(dsn = "data/geospatial", layer="CostalOutline")
 mpsz_sf <- st_read(dsn = "data/geospatial", layer = "MP14_SUBZONE_WEB_PL")
 
 ```
+
 ```{r}
 plot(mpsz_sf)
 ```
+
 ```{r}
 #to get Singapore coastal outline
 sg_sf <- mpsz_sf %>% st_union()
@@ -33,18 +36,21 @@ sg_sf_combine <- mpsz_sf %>% st_combine()
 plot(sg_sf_combine) #will include all the polygons that are available in the mpsz_sf
 ```
 
-
 ```{r}
 plot(sg_sf)
 ```
+
 ```{r}
 childcare_ppp <- as.ppp(childcare_sf) #to immediately change the sf to ppp without changing to sp 
 summary(childcare_ppp)
 ```
+
 We can check the duplication in a ppp object using `duplicated()` function
+
 ```{r}
 any(duplicated(childcare_ppp))
 ```
+
 #### Creating owin object
 
 ```{r}
@@ -57,6 +63,7 @@ the output object can be displayed using plot() function
 ```{r}
 plot(sg_owin)
 ```
+
 #### Combining points of childcare points within the SG boundary
 
 ```{r}
@@ -77,6 +84,7 @@ plot(tm, main="TAMPINES")
 plot(ck, main="CHOA CHU KANG")
 plot(jw, main="JURONG WEST")
 ```
+
 #In-Class Exercise 3
 
 ```{r}
@@ -105,7 +113,6 @@ lixels <- lixelize_lines(network, 750, mindist = 375)
 samples <- lines_center(lixels)
 ```
 
-
 ```{r}
 densities <- nkde(network, # IMPORTANT
                   events = childcare,
@@ -132,7 +139,6 @@ samples$density <- samples$density*1000
 lixels$density <- lixels$density*1000
 ```
 
-
 ```{r}
 tmap_mode('view')
 tm_shape(lixels) +
@@ -141,4 +147,3 @@ tm_shape(lixels) +
   tm_dots()
 tmap_mode("plot")
 ```
-

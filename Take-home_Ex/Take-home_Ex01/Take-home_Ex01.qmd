@@ -46,7 +46,9 @@ pacman::p_load(sf, spatstat, raster, maptools, tmap, tidyverse, arrow)
 -   [Grab-Posisi](https://engineering.grab.com/grab-posisi) - a dataset of Grab taxi location points
 
 ```{r}
+#| code-summary: "Read the Grab taxi location points dataset"
 grab <- open_dataset("data/aspatial/GrabPosisi") |> as_tibble()
+#grab <- read_parquet("data/aspatial/GrabPosisi/part-00000-8bbff892-97d2-4011-9961-703e38972569.c000.snappy.parquet")
 grab
 ```
 
@@ -70,46 +72,284 @@ mpsz2019 <- st_read("data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.g
 
 ## Aspatial Data
 
+#### **Converting data type of pingtimestamp(int) to date-time(dttm)**
+
+As we want to find the starting and ending points of the Grab taxi location, we need to find the starting and ending time of the trip. However, the current *pingtimestamp* is in the integer format, so that currently it is not that readable. As such, we need to transform the data type of *pingtimestamp* into date-time format.
+
+```{r}
+grab$pingtimestamp <- as_datetime(grab$pingtimestamp)
+glimpse(grab)
+```
+
+#### **Finding the start of the trip**
+
+Now we find the starting location by arranging the pingtimestamp in an ascending order for each trip and get the earliest time.
+
+```{r}
+start_grab <- grab %>%
+  group_by(trj_id) %>% # group based on the trips
+  arrange(pingtimestamp) %>% # arrange the time in ascending order
+  filter(row_number() == 1) %>% # choose the first timing
+  mutate(weekday = wday(pingtimestamp,
+                        label = TRUE,
+                        abbr = TRUE),
+         start_hr = hour(pingtimestamp),
+         day = factor(mday(pingtimestamp)))
+
+start_grab
+```
+
+#### **Finding the end of the trip**
+
+We also need to find the ending location by arranging the pingtimestamp in an descending order for each trip and get the latest time.
+
+```{r}
+end_grab <- grab %>%
+  group_by(trj_id) %>% # group based on the trips
+  arrange(desc(pingtimestamp)) %>% # arrange the time in descending order
+  filter(row_number() == 1) %>% # choose the first timing
+  mutate(weekday = wday(pingtimestamp,
+                        label = TRUE,
+                        abbr = TRUE),
+         start_hr = hour(pingtimestamp),
+         day = factor(mday(pingtimestamp)))
+
+end_grab
+```
+
+#### **Convert the dataframe into sf and change the projection coordinate system**
+
+After finding the starting and ending timing for each trip, we want to make the two dataframes to be an sf data type to be able to process it with the other files. First, we need to change it to an sf data type using the *st_as_sf()* function to change the longitude(rawlng) and latitude(rawlat) of the starting locations into points. Then we transform the projection coordinate system to Singapore's.
+
+```{r}
+start_sf <- st_as_sf(start_grab,
+                      coords = c("rawlng", "rawlat"),
+                      crs = 4326) |>
+  st_transform(crs = 3414)
+
+end_sf <- st_as_sf(end_grab,
+                      coords = c("rawlng", "rawlat"),
+                      crs = 4326) |>
+  st_transform(crs = 3414)
+```
+
+#### **Save the sf into RDS and call to use**
+
+```{r}
+saveRDS(start_sf, file = "start_sf.rds")
+saveRDS(end_sf, file = "end_sf.rds")
+```
+
+```{r}
+start_sf <- readRDS("start_sf.rds")
+end_sf <- readRDS("end_sf.rds")
+```
+
+#### **Convert the dataframe into ppp and find for any duplicates**
+
+```{r}
+start_ppp <- as.ppp(start_sf)
+any(duplicated(start_ppp))
+```
+
 ## Geospatial Data
 
-**Check the projection layers of the Road and the Master Plan 2019 Subzone Boundary**
+#### **Check the projection layers of the Road and the Master Plan 2019 Subzone Boundary**
 
-::: {.panel-tabset}
+::: panel-tabset
 ### road
+
 ```{r}
 #| code-summary: "Check the projection for road layer"
 st_crs(road)
 ```
+
 ### mpsz2019
+
 ```{r}
 #| code-summary: "Check the projection for mpsz2019 layer"
 st_crs(mpsz2019)
 ```
-
 :::
 
 From the result of the code above, we can see that both of the data have the same projection, which is WGS 84 with the CRS of EPSG 4326.
 
-```{r}
-mpsz_new <- st_set_crs(mpsz2019, 3414)
-road_new <- st_set_crs(road, 3414)
-sg_boundary <- st_union(mpsz_new)
+#### **Change the projection to Singapore's projected coordinate system**
 
-```
+However, the projection mentioned above does not fit the Singapore's projection, so we need to change both of the projection to SVY21 / Singapore TM with the CRS of EPSG 3414.
+
+::: panel-tabset
+### road
+
 ```{r}
-sg_road <- st_filter(road_new, sg_boundary, .pred = st_intersects)
+road <- st_transform(road, 3414)
+st_crs(road)
+```
+
+### mpsz2019
+
+```{r}
+mpsz2019 <- st_zm(mpsz2019, zm="Z")
+mpsz2019 <- st_transform(mpsz2019, 3414)
+st_crs(mpsz2019)
+```
+:::
+
+#### **Set the Singapore boundary**
+
+We already set the projection coordinate system for *mpsz2019* and *road* to the Singapore's projected coordinate system. With this, we can find the boundary for Singapore using *st_union()* of the *mpsz2019*.
+
+Since we want to exclude the outer islands, we need to remove the polygons of these outer islands using the *filter()* function from the dplyr package.
+
+```{r}
+main_sg <- mpsz2019 %>% filter(!grepl("ISLANDS", Description))
+```
+
+Then we can plot the Singapore mainland to see the mainland boundary of our Singapore map.
+
+```{r}
+sg_boundary <- st_union(main_sg)
+plot(sg_boundary)
+```
+
+#### **Filtering to Singapore roads**
+
+Now, we need to filter the roads to those which are in Singapore. This can be done using *st_intersection()* or *st_filter()*
+
+```{r}
+#| eval: false
+road_sg <- st_intersection(road, sg_boundary)
+plot(road_sg["geometry"])
+```
+
+```{r}
+#| eval: false
+sg_road <- st_filter(road, sg_boundary, .pred = st_intersects)
 plot(sg_road["geometry"])
 ```
+
+As the running time of *st_intersection()* and *st_filter()* to filter the roads in Singapore is too long, we can save the data inside an RDS file with *saveRDS()*, so the next time we want to use the data, we can just load this file using *readRDS()*
+
 ```{r}
+#| eval: false
 saveRDS(sg_road, file = "sg_road.rds")
+saveRDS(road_sg, file = "road_sg.rds")
 ```
 
+```{r}
+sg_road <- readRDS("sg_road.rds")
+plot(sg_road["geometry"])
+```
 
-# Exploratory Data Analysis
+```{r}
+tmap_mode("plot")
+tm_shape(start_sf) +
+  tm_dots(col="red") +
+  tm_shape(sg_road) +
+  tm_lines()
+```
 
-## 
+```{r}
+sg_boundary_spatial <- as_Spatial(sg_boundary)
+sg_boundary_sp <- as(sg_boundary_spatial, "SpatialPolygons")
+sg_boundary_owin <- as(sg_boundary_sp, "owin")
+plot(sg_boundary_owin)
+```
+
+#### **Combining starting points of Grab taxis with the Singapore boundary owin object**
+
+```{r}
+start_grab_ppp = start_ppp[sg_boundary_owin]
+plot(start_grab_ppp)
+```
 
 # Kernel Density Estimation
+
+#### **Computing kernel density estimation using automatic bandwidth selection method**
+
+We use *density()* function of the **spatstat** package to compute the kernel density. There are some configurations for this function:
+
+-   Bandwidth: we can use *bw.diggle()*, *bw.CvL()*, *bw.scott()*, *bw.ppl()* for the bandwidth selection method
+
+-   Kernel: the smoothing kernels are *gaussian*, *epanechnikov*, *quartic*, *disc*
+
+First we try with using *bw.diggle()* and *gaussian* as our bandwidth and kernel respectively.
+
+```{r}
+kde_start_bw <- density(start_grab_ppp,
+                              sigma=bw.diggle,
+                              edge=TRUE,
+                            kernel="gaussian") 
+plot(kde_start_bw)
+
+```
+
+The density values of the output is very small (from 0 to 0.002) which is too small to comprehend as the default unit measurement for SVY21 is in meters.
+
+To mitigate this problem, we can use the *rescale()* function to convert the units into kilometers.
+
+```{r}
+start_grab_ppp.km <- rescale(start_grab_ppp, 1000, "km")
+```
+
+```{r}
+kde_start_bw.km <- density(start_grab_ppp.km,
+                              sigma=bw.diggle,
+                              edge=TRUE,
+                            kernel="gaussian") 
+plot(kde_start_bw.km)
+```
+
+Let us try to plot the kernel density graphs with the different bandwidth selection method.
+
+```{r}
+kde_start_bw_diggle.km <- density(start_grab_ppp.km,
+                              sigma=bw.diggle,
+                              edge=TRUE,
+                            kernel="gaussian") 
+kde_start_bw_cvl.km <- density(start_grab_ppp.km,
+                              sigma=bw.CvL,
+                              edge=TRUE,
+                            kernel="gaussian") 
+kde_start_bw_scott.km <- density(start_grab_ppp.km,
+                              sigma=bw.scott,
+                              edge=TRUE,
+                            kernel="gaussian") 
+kde_start_bw_ppl.km <- density(start_grab_ppp.km,
+                              sigma=bw.ppl,
+                              edge=TRUE,
+                            kernel="gaussian") 
+par(mfrow=c(2, 2))
+plot(kde_start_bw_diggle.km, main ="bw.diggle")
+plot(kde_start_bw_cvl.km, main ="bw.cvl")
+plot(kde_start_bw_scott.km, main ="bw.scott")
+plot(kde_start_bw_ppl.km, main ="bw.ppl")
+```
+
+```{r}
+kde_start_adaptive <- adaptive.density(start_grab_ppp.km, method="kernel")
+plot(kde_start_adaptive)
+```
+
+Since the starting points of the trips are independent of each other, it is more suitable for us to use *bw.diggle()* or *bw.ppl()* to understand about the starting location of the Grab taxi. Moreover, since we are analyzing geographical points that are
+
+```{r}
+gridded_kde_start <- as.SpatialGridDataFrame.im(kde_start_bw.km)
+kde_start_bw_raster <- raster(gridded_kde_start)
+kde_start_bw_raster
+```
+
+```{r}
+projection(kde_start_bw_raster) <- CRS("+init=EPSG:3414")
+kde_start_bw_raster
+```
+
+```{r}
+tmap_mode("plot")
+tm_shape(kde_start_bw_raster) +
+    tm_raster() +
+    tm_layout(legend.position = c("right", "bottom"), frame = FALSE)
+```
 
 # Network Kernel Density Estimation (NKDE)
 

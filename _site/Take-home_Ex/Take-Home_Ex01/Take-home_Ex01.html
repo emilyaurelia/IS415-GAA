@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Emily Aurelia">
-<meta name="dcterms.date" content="2024-01-29">
+<meta name="dcterms.date" content="2024-02-04">
 
 <title>IS415-GAA - Take-Home Exercise 1: Application of Spatial Point Patterns Analysis to discover the geographical distribution of Grab hailing services in Singapore</title>
 <style>
@@ -205,14 +205,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#data-preprocessing" id="toc-data-preprocessing" class="nav-link" data-scroll-target="#data-preprocessing">Data Preprocessing</a>
   <ul>
-  <li><a href="#aspatial-data-1" id="toc-aspatial-data-1" class="nav-link" data-scroll-target="#aspatial-data-1">Aspatial Data</a></li>
-  <li><a href="#geospatial-data-1" id="toc-geospatial-data-1" class="nav-link" data-scroll-target="#geospatial-data-1">Geospatial Data</a></li>
+  <li><a href="#aspatial-data-1" id="toc-aspatial-data-1" class="nav-link" data-scroll-target="#aspatial-data-1">Aspatial Data</a>
+  <ul class="collapse">
+  <li><a href="#converting-data-type-of-pingtimestampint-to-date-timedttm" id="toc-converting-data-type-of-pingtimestampint-to-date-timedttm" class="nav-link" data-scroll-target="#converting-data-type-of-pingtimestampint-to-date-timedttm"><strong>Converting data type of pingtimestamp(int) to date-time(dttm)</strong></a></li>
+  <li><a href="#finding-the-start-of-the-trip" id="toc-finding-the-start-of-the-trip" class="nav-link" data-scroll-target="#finding-the-start-of-the-trip"><strong>Finding the start of the trip</strong></a></li>
+  <li><a href="#finding-the-end-of-the-trip" id="toc-finding-the-end-of-the-trip" class="nav-link" data-scroll-target="#finding-the-end-of-the-trip"><strong>Finding the end of the trip</strong></a></li>
+  <li><a href="#convert-the-dataframe-into-sf-and-change-the-projection-coordinate-system" id="toc-convert-the-dataframe-into-sf-and-change-the-projection-coordinate-system" class="nav-link" data-scroll-target="#convert-the-dataframe-into-sf-and-change-the-projection-coordinate-system"><strong>Convert the dataframe into sf and change the projection coordinate system</strong></a></li>
+  <li><a href="#save-the-sf-into-rds-and-call-to-use" id="toc-save-the-sf-into-rds-and-call-to-use" class="nav-link" data-scroll-target="#save-the-sf-into-rds-and-call-to-use"><strong>Save the sf into RDS and call to use</strong></a></li>
+  <li><a href="#convert-the-dataframe-into-ppp-and-find-for-any-duplicates" id="toc-convert-the-dataframe-into-ppp-and-find-for-any-duplicates" class="nav-link" data-scroll-target="#convert-the-dataframe-into-ppp-and-find-for-any-duplicates"><strong>Convert the dataframe into ppp and find for any duplicates</strong></a></li>
   </ul></li>
-  <li><a href="#exploratory-data-analysis" id="toc-exploratory-data-analysis" class="nav-link" data-scroll-target="#exploratory-data-analysis">Exploratory Data Analysis</a>
+  <li><a href="#geospatial-data-1" id="toc-geospatial-data-1" class="nav-link" data-scroll-target="#geospatial-data-1">Geospatial Data</a>
+  <ul class="collapse">
+  <li><a href="#check-the-projection-layers-of-the-road-and-the-master-plan-2019-subzone-boundary" id="toc-check-the-projection-layers-of-the-road-and-the-master-plan-2019-subzone-boundary" class="nav-link" data-scroll-target="#check-the-projection-layers-of-the-road-and-the-master-plan-2019-subzone-boundary"><strong>Check the projection layers of the Road and the Master Plan 2019 Subzone Boundary</strong></a></li>
+  <li><a href="#change-the-projection-to-singapores-projected-coordinate-system" id="toc-change-the-projection-to-singapores-projected-coordinate-system" class="nav-link" data-scroll-target="#change-the-projection-to-singapores-projected-coordinate-system"><strong>Change the projection to Singapore’s projected coordinate system</strong></a></li>
+  <li><a href="#set-the-singapore-boundary" id="toc-set-the-singapore-boundary" class="nav-link" data-scroll-target="#set-the-singapore-boundary"><strong>Set the Singapore boundary</strong></a></li>
+  <li><a href="#filtering-to-singapore-roads" id="toc-filtering-to-singapore-roads" class="nav-link" data-scroll-target="#filtering-to-singapore-roads"><strong>Filtering to Singapore roads</strong></a></li>
+  <li><a href="#combining-starting-points-of-grab-taxis-with-the-singapore-boundary-owin-object" id="toc-combining-starting-points-of-grab-taxis-with-the-singapore-boundary-owin-object" class="nav-link" data-scroll-target="#combining-starting-points-of-grab-taxis-with-the-singapore-boundary-owin-object"><strong>Combining starting points of Grab taxis with the Singapore boundary owin object</strong></a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#kernel-density-estimation" id="toc-kernel-density-estimation" class="nav-link" data-scroll-target="#kernel-density-estimation">Kernel Density Estimation</a>
   <ul>
-  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"></a></li>
+  <li><a href="#computing-kernel-density-estimation-using-automatic-bandwidth-selection-method" id="toc-computing-kernel-density-estimation-using-automatic-bandwidth-selection-method" class="nav-link" data-scroll-target="#computing-kernel-density-estimation-using-automatic-bandwidth-selection-method"><strong>Computing kernel density estimation using automatic bandwidth selection method</strong></a></li>
   </ul></li>
-  <li><a href="#kernel-density-estimation" id="toc-kernel-density-estimation" class="nav-link" data-scroll-target="#kernel-density-estimation">Kernel Density Estimation</a></li>
   <li><a href="#network-kernel-density-estimation-nkde" id="toc-network-kernel-density-estimation-nkde" class="nav-link" data-scroll-target="#network-kernel-density-estimation-nkde">Network Kernel Density Estimation (NKDE)</a></li>
   <li><a href="#temporal-network-kernel-density-estimation-tnkde" id="toc-temporal-network-kernel-density-estimation-tnkde" class="nav-link" data-scroll-target="#temporal-network-kernel-density-estimation-tnkde">Temporal Network Kernel Density Estimation (TNKDE)</a></li>
   </ul>
@@ -240,7 +254,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">January 29, 2024</p>
+      <p class="date">February 4, 2024</p>
     </div>
   </div>
   
@@ -281,7 +295,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>grab <span class="ot">&lt;-</span> <span class="fu">open_dataset</span>(<span class="st">"data/aspatial/GrabPosisi"</span>) <span class="sc">|&gt;</span> <span class="fu">as_tibble</span>()</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>grab</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#grab &lt;- read_parquet("data/aspatial/GrabPosisi/part-00000-8bbff892-97d2-4011-9961-703e38972569.c000.snappy.parquet")</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>grab</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 30,329,685 × 9
    trj_id driving_mode osname pingtimestamp rawlat rawlng speed bearing accuracy
@@ -341,16 +356,144 @@ Geodetic CRS:  WGS 84</code></pre>
 <h1>Data Preprocessing</h1>
 <section id="aspatial-data-1" class="level2">
 <h2 class="anchored" data-anchor-id="aspatial-data-1">Aspatial Data</h2>
+<section id="converting-data-type-of-pingtimestampint-to-date-timedttm" class="level4">
+<h4 class="anchored" data-anchor-id="converting-data-type-of-pingtimestampint-to-date-timedttm"><strong>Converting data type of pingtimestamp(int) to date-time(dttm)</strong></h4>
+<p>As we want to find the starting and ending points of the Grab taxi location, we need to find the starting and ending time of the trip. However, the current <em>pingtimestamp</em> is in the integer format, so that currently it is not that readable. As such, we need to transform the data type of <em>pingtimestamp</em> into date-time format.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>grab<span class="sc">$</span>pingtimestamp <span class="ot">&lt;-</span> <span class="fu">as_datetime</span>(grab<span class="sc">$</span>pingtimestamp)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(grab)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 30,329,685
+Columns: 9
+$ trj_id        &lt;chr&gt; "70014", "73573", "75567", "1410", "4354", "32630", "646…
+$ driving_mode  &lt;chr&gt; "car", "car", "car", "car", "car", "car", "car", "car", …
+$ osname        &lt;chr&gt; "android", "android", "android", "android", "android", "…
+$ pingtimestamp &lt;dttm&gt; 2019-04-11 00:40:36, 2019-04-18 10:17:03, 2019-04-13 07…
+$ rawlat        &lt;dbl&gt; 1.342326, 1.321781, 1.327088, 1.262482, 1.283799, 1.3003…
+$ rawlng        &lt;dbl&gt; 103.8890, 103.8564, 103.8613, 103.8238, 103.8072, 103.90…
+$ speed         &lt;dbl&gt; 18.910000, 17.719076, 14.021548, 13.026521, 14.812943, 2…
+$ bearing       &lt;int&gt; 248, 44, 34, 181, 93, 73, 82, 321, 324, 31, 203, 50, 252…
+$ accuracy      &lt;dbl&gt; 3.900, 4.000, 3.900, 4.000, 3.900, 3.900, 3.000, 3.649, …</code></pre>
+</div>
+</div>
+</section>
+<section id="finding-the-start-of-the-trip" class="level4">
+<h4 class="anchored" data-anchor-id="finding-the-start-of-the-trip"><strong>Finding the start of the trip</strong></h4>
+<p>Now we find the starting location by arranging the pingtimestamp in an ascending order for each trip and get the earliest time.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>start_grab <span class="ot">&lt;-</span> grab <span class="sc">%&gt;%</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(trj_id) <span class="sc">%&gt;%</span> <span class="co"># group based on the trips</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(pingtimestamp) <span class="sc">%&gt;%</span> <span class="co"># arrange the time in ascending order</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">row_number</span>() <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> <span class="co"># choose the first timing</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">weekday =</span> <span class="fu">wday</span>(pingtimestamp,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>                        <span class="at">label =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>                        <span class="at">abbr =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">start_hr =</span> <span class="fu">hour</span>(pingtimestamp),</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">day =</span> <span class="fu">factor</span>(<span class="fu">mday</span>(pingtimestamp)))</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>start_grab</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 28,000 × 12
+# Groups:   trj_id [28,000]
+   trj_id driving_mode osname  pingtimestamp       rawlat rawlng  speed bearing
+   &lt;chr&gt;  &lt;chr&gt;        &lt;chr&gt;   &lt;dttm&gt;               &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;int&gt;
+ 1 70895  car          android 2019-04-08 00:09:26   1.38   104.  9.95      111
+ 2 21926  car          android 2019-04-08 00:09:48   1.29   104. 11.0        75
+ 3 47498  car          ios     2019-04-08 00:09:50   1.38   104. 18.6       307
+ 4 18103  car          android 2019-04-08 00:09:55   1.45   104.  0.404     159
+ 5 41322  car          android 2019-04-08 00:09:57   1.28   104. 17.9       232
+ 6 64813  car          ios     2019-04-08 00:10:03   1.31   104. 17.1       106
+ 7 81518  car          ios     2019-04-08 00:10:14   1.31   104.  6.24      213
+ 8 66542  car          android 2019-04-08 00:11:17   1.36   104.  9.11      179
+ 9 25201  car          ios     2019-04-08 00:12:05   1.37   104. 12.0       211
+10 82401  car          android 2019-04-08 00:12:11   1.30   104. 10.6       107
+# ℹ 27,990 more rows
+# ℹ 4 more variables: accuracy &lt;dbl&gt;, weekday &lt;ord&gt;, start_hr &lt;int&gt;, day &lt;fct&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="finding-the-end-of-the-trip" class="level4">
+<h4 class="anchored" data-anchor-id="finding-the-end-of-the-trip"><strong>Finding the end of the trip</strong></h4>
+<p>We also need to find the ending location by arranging the pingtimestamp in an descending order for each trip and get the latest time.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>end_grab <span class="ot">&lt;-</span> grab <span class="sc">%&gt;%</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(trj_id) <span class="sc">%&gt;%</span> <span class="co"># group based on the trips</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(pingtimestamp)) <span class="sc">%&gt;%</span> <span class="co"># arrange the time in descending order</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">row_number</span>() <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span> <span class="co"># choose the first timing</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">weekday =</span> <span class="fu">wday</span>(pingtimestamp,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>                        <span class="at">label =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>                        <span class="at">abbr =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">start_hr =</span> <span class="fu">hour</span>(pingtimestamp),</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">day =</span> <span class="fu">factor</span>(<span class="fu">mday</span>(pingtimestamp)))</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>end_grab</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 28,000 × 12
+# Groups:   trj_id [28,000]
+   trj_id driving_mode osname  pingtimestamp       rawlat rawlng  speed bearing
+   &lt;chr&gt;  &lt;chr&gt;        &lt;chr&gt;   &lt;dttm&gt;               &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;int&gt;
+ 1 81574  car          ios     2019-04-21 23:56:49   1.34   104. 15.3       103
+ 2 54687  car          android 2019-04-21 23:56:46   1.44   104.  8.15      299
+ 3 17190  car          android 2019-04-21 23:56:36   1.34   104. 12.4       202
+ 4 13793  car          android 2019-04-21 23:56:30   1.32   104.  6.47      170
+ 5 39014  car          ios     2019-04-21 23:56:27   1.33   104.  3.59      169
+ 6 41170  car          ios     2019-04-21 23:56:13   1.32   104. 13.1        71
+ 7 64519  car          ios     2019-04-21 23:55:49   1.43   104. 14.3       239
+ 8 70461  car          ios     2019-04-21 23:55:32   1.29   104.  0.970      51
+ 9 41154  car          ios     2019-04-21 23:55:10   1.32   104. 10.8       118
+10 65488  car          ios     2019-04-21 23:54:47   1.38   104.  0         244
+# ℹ 27,990 more rows
+# ℹ 4 more variables: accuracy &lt;dbl&gt;, weekday &lt;ord&gt;, start_hr &lt;int&gt;, day &lt;fct&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="convert-the-dataframe-into-sf-and-change-the-projection-coordinate-system" class="level4">
+<h4 class="anchored" data-anchor-id="convert-the-dataframe-into-sf-and-change-the-projection-coordinate-system"><strong>Convert the dataframe into sf and change the projection coordinate system</strong></h4>
+<p>After finding the starting and ending timing for each trip, we want to make the two dataframes to be an sf data type to be able to process it with the other files. First, we need to change it to an sf data type using the <em>st_as_sf()</em> function to change the longitude(rawlng) and latitude(rawlat) of the starting locations into points. Then we transform the projection coordinate system to Singapore’s.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>start_sf <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(start_grab,</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>                      <span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"rawlng"</span>, <span class="st">"rawlat"</span>),</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>                      <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">3414</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>end_sf <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(end_grab,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>                      <span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"rawlng"</span>, <span class="st">"rawlat"</span>),</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>                      <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">3414</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="save-the-sf-into-rds-and-call-to-use" class="level4">
+<h4 class="anchored" data-anchor-id="save-the-sf-into-rds-and-call-to-use"><strong>Save the sf into RDS and call to use</strong></h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(start_sf, <span class="at">file =</span> <span class="st">"start_sf.rds"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(end_sf, <span class="at">file =</span> <span class="st">"end_sf.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>start_sf <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"start_sf.rds"</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>end_sf <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"end_sf.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="convert-the-dataframe-into-ppp-and-find-for-any-duplicates" class="level4">
+<h4 class="anchored" data-anchor-id="convert-the-dataframe-into-ppp-and-find-for-any-duplicates"><strong>Convert the dataframe into ppp and find for any duplicates</strong></h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>start_ppp <span class="ot">&lt;-</span> <span class="fu">as.ppp</span>(start_sf)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">any</span>(<span class="fu">duplicated</span>(start_ppp))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] FALSE</code></pre>
+</div>
+</div>
+</section>
 </section>
 <section id="geospatial-data-1" class="level2">
 <h2 class="anchored" data-anchor-id="geospatial-data-1">Geospatial Data</h2>
-<p><strong>Check the projection layers of the Road and the Master Plan 2019 Subzone Boundary</strong></p>
+<section id="check-the-projection-layers-of-the-road-and-the-master-plan-2019-subzone-boundary" class="level4">
+<h4 class="anchored" data-anchor-id="check-the-projection-layers-of-the-road-and-the-master-plan-2019-subzone-boundary"><strong>Check the projection layers of the Road and the Master Plan 2019 Subzone Boundary</strong></h4>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">road</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">mpsz2019</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(road)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(road)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Coordinate Reference System:
   User input: WGS 84 
@@ -374,7 +517,7 @@ GEOGCRS["WGS 84",
 </div>
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(mpsz2019)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(mpsz2019)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Coordinate Reference System:
   User input: WGS 84 
@@ -399,31 +542,295 @@ GEOGCRS["WGS 84",
 </div>
 </div>
 <p>From the result of the code above, we can see that both of the data have the same projection, which is WGS 84 with the CRS of EPSG 4326.</p>
+</section>
+<section id="change-the-projection-to-singapores-projected-coordinate-system" class="level4">
+<h4 class="anchored" data-anchor-id="change-the-projection-to-singapores-projected-coordinate-system"><strong>Change the projection to Singapore’s projected coordinate system</strong></h4>
+<p>However, the projection mentioned above does not fit the Singapore’s projection, so we need to change both of the projection to SVY21 / Singapore TM with the CRS of EPSG 3414.</p>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">road</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">mpsz2019</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>mpsz_new <span class="ot">&lt;-</span> <span class="fu">st_set_crs</span>(mpsz2019, <span class="dv">3414</span>)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>road_new <span class="ot">&lt;-</span> <span class="fu">st_set_crs</span>(road, <span class="dv">3414</span>)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>sg_boundary <span class="ot">&lt;-</span> <span class="fu">st_union</span>(mpsz_new)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>road <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(road, <span class="dv">3414</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(road)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Coordinate Reference System:
+  User input: EPSG:3414 
+  wkt:
+PROJCRS["SVY21 / Singapore TM",
+    BASEGEOGCRS["SVY21",
+        DATUM["SVY21",
+            ELLIPSOID["WGS 84",6378137,298.257223563,
+                LENGTHUNIT["metre",1]]],
+        PRIMEM["Greenwich",0,
+            ANGLEUNIT["degree",0.0174532925199433]],
+        ID["EPSG",4757]],
+    CONVERSION["Singapore Transverse Mercator",
+        METHOD["Transverse Mercator",
+            ID["EPSG",9807]],
+        PARAMETER["Latitude of natural origin",1.36666666666667,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8801]],
+        PARAMETER["Longitude of natural origin",103.833333333333,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8802]],
+        PARAMETER["Scale factor at natural origin",1,
+            SCALEUNIT["unity",1],
+            ID["EPSG",8805]],
+        PARAMETER["False easting",28001.642,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8806]],
+        PARAMETER["False northing",38744.572,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8807]]],
+    CS[Cartesian,2],
+        AXIS["northing (N)",north,
+            ORDER[1],
+            LENGTHUNIT["metre",1]],
+        AXIS["easting (E)",east,
+            ORDER[2],
+            LENGTHUNIT["metre",1]],
+    USAGE[
+        SCOPE["Cadastre, engineering survey, topographic mapping."],
+        AREA["Singapore - onshore and offshore."],
+        BBOX[1.13,103.59,1.47,104.07]],
+    ID["EPSG",3414]]</code></pre>
 </div>
+</div>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>sg_road <span class="ot">&lt;-</span> <span class="fu">st_filter</span>(road_new, sg_boundary, <span class="at">.pred =</span> st_intersects)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sg_road[<span class="st">"geometry"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>mpsz2019 <span class="ot">&lt;-</span> <span class="fu">st_zm</span>(mpsz2019, <span class="at">zm=</span><span class="st">"Z"</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>mpsz2019 <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(mpsz2019, <span class="dv">3414</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(mpsz2019)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Coordinate Reference System:
+  User input: EPSG:3414 
+  wkt:
+PROJCRS["SVY21 / Singapore TM",
+    BASEGEOGCRS["SVY21",
+        DATUM["SVY21",
+            ELLIPSOID["WGS 84",6378137,298.257223563,
+                LENGTHUNIT["metre",1]]],
+        PRIMEM["Greenwich",0,
+            ANGLEUNIT["degree",0.0174532925199433]],
+        ID["EPSG",4757]],
+    CONVERSION["Singapore Transverse Mercator",
+        METHOD["Transverse Mercator",
+            ID["EPSG",9807]],
+        PARAMETER["Latitude of natural origin",1.36666666666667,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8801]],
+        PARAMETER["Longitude of natural origin",103.833333333333,
+            ANGLEUNIT["degree",0.0174532925199433],
+            ID["EPSG",8802]],
+        PARAMETER["Scale factor at natural origin",1,
+            SCALEUNIT["unity",1],
+            ID["EPSG",8805]],
+        PARAMETER["False easting",28001.642,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8806]],
+        PARAMETER["False northing",38744.572,
+            LENGTHUNIT["metre",1],
+            ID["EPSG",8807]]],
+    CS[Cartesian,2],
+        AXIS["northing (N)",north,
+            ORDER[1],
+            LENGTHUNIT["metre",1]],
+        AXIS["easting (E)",east,
+            ORDER[2],
+            LENGTHUNIT["metre",1]],
+    USAGE[
+        SCOPE["Cadastre, engineering survey, topographic mapping."],
+        AREA["Singapore - onshore and offshore."],
+        BBOX[1.13,103.59,1.47,104.07]],
+    ID["EPSG",3414]]</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="set-the-singapore-boundary" class="level4">
+<h4 class="anchored" data-anchor-id="set-the-singapore-boundary"><strong>Set the Singapore boundary</strong></h4>
+<p>We already set the projection coordinate system for <em>mpsz2019</em> and <em>road</em> to the Singapore’s projected coordinate system. With this, we can find the boundary for Singapore using <em>st_union()</em> of the <em>mpsz2019</em>.</p>
+<p>Since we want to exclude the outer islands, we need to remove the polygons of these outer islands using the <em>filter()</em> function from the dplyr package.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>main_sg <span class="ot">&lt;-</span> mpsz2019 <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">grepl</span>(<span class="st">"ISLANDS"</span>, Description))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Then we can plot the Singapore mainland to see the mainland boundary of our Singapore map.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>sg_boundary <span class="ot">&lt;-</span> <span class="fu">st_union</span>(main_sg)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sg_boundary)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="filtering-to-singapore-roads" class="level4">
+<h4 class="anchored" data-anchor-id="filtering-to-singapore-roads"><strong>Filtering to Singapore roads</strong></h4>
+<p>Now, we need to filter the roads to those which are in Singapore. This can be done using <em>st_intersection()</em> or <em>st_filter()</em></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>road_sg <span class="ot">&lt;-</span> <span class="fu">st_intersection</span>(road, sg_boundary)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(road_sg[<span class="st">"geometry"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>sg_road <span class="ot">&lt;-</span> <span class="fu">st_filter</span>(road, sg_boundary, <span class="at">.pred =</span> st_intersects)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sg_road[<span class="st">"geometry"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>As the running time of <em>st_intersection()</em> and <em>st_filter()</em> to filter the roads in Singapore is too long, we can save the data inside an RDS file with <em>saveRDS()</em>, so the next time we want to use the data, we can just load this file using <em>readRDS()</em></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(sg_road, <span class="at">file =</span> <span class="st">"sg_road.rds"</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(road_sg, <span class="at">file =</span> <span class="st">"road_sg.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>sg_road <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"sg_road.rds"</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sg_road[<span class="st">"geometry"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(sg_road, <span class="at">file =</span> <span class="st">"sg_road.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(start_sf) <span class="sc">+</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_dots</span>(<span class="at">col=</span><span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(sg_road) <span class="sc">+</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_lines</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>sg_boundary_spatial <span class="ot">&lt;-</span> <span class="fu">as_Spatial</span>(sg_boundary)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>sg_boundary_sp <span class="ot">&lt;-</span> <span class="fu">as</span>(sg_boundary_spatial, <span class="st">"SpatialPolygons"</span>)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>sg_boundary_owin <span class="ot">&lt;-</span> <span class="fu">as</span>(sg_boundary_sp, <span class="st">"owin"</span>)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sg_boundary_owin)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
+</div>
 </div>
 </section>
+<section id="combining-starting-points-of-grab-taxis-with-the-singapore-boundary-owin-object" class="level4">
+<h4 class="anchored" data-anchor-id="combining-starting-points-of-grab-taxis-with-the-singapore-boundary-owin-object"><strong>Combining starting points of Grab taxis with the Singapore boundary owin object</strong></h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>start_grab_ppp <span class="ot">=</span> start_ppp[sg_boundary_owin]</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(start_grab_ppp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
 </section>
-<section id="exploratory-data-analysis" class="level1">
-<h1>Exploratory Data Analysis</h1>
-<section id="section" class="level2">
-<h2 class="anchored" data-anchor-id="section"></h2>
 </section>
 </section>
 <section id="kernel-density-estimation" class="level1">
 <h1>Kernel Density Estimation</h1>
+<section id="computing-kernel-density-estimation-using-automatic-bandwidth-selection-method" class="level4">
+<h4 class="anchored" data-anchor-id="computing-kernel-density-estimation-using-automatic-bandwidth-selection-method"><strong>Computing kernel density estimation using automatic bandwidth selection method</strong></h4>
+<p>We use <em>density()</em> function of the <strong>spatstat</strong> package to compute the kernel density. There are some configurations for this function:</p>
+<ul>
+<li><p>Bandwidth: we can use <em>bw.diggle()</em>, <em>bw.CvL()</em>, <em>bw.scott()</em>, <em>bw.ppl()</em> for the bandwidth selection method</p></li>
+<li><p>Kernel: the smoothing kernels are <em>gaussian</em>, <em>epanechnikov</em>, <em>quartic</em>, <em>disc</em></p></li>
+</ul>
+<p>First we try with using <em>bw.diggle()</em> and <em>gaussian</em> as our bandwidth and kernel respectively.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>kde_start_bw <span class="ot">&lt;-</span> <span class="fu">density</span>(start_grab_ppp,</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">sigma=</span>bw.diggle,</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>                              <span class="at">edge=</span><span class="cn">TRUE</span>,</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>                            <span class="at">kernel=</span><span class="st">"gaussian"</span>) </span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_start_bw)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The density values of the output is very small (from 0 to 0.002) which is too small to comprehend as the default unit measurement for SVY21 is in meters.</p>
+<p>To mitigate this problem, we can use the <em>rescale()</em> function to convert the units into kilometers.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>start_grab_ppp.km <span class="ot">&lt;-</span> <span class="fu">rescale</span>(start_grab_ppp, <span class="dv">1000</span>, <span class="st">"km"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>kde_start_bw.km <span class="ot">&lt;-</span> <span class="fu">density</span>(start_grab_ppp.km,</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">sigma=</span>bw.diggle,</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>                              <span class="at">edge=</span><span class="cn">TRUE</span>,</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>                            <span class="at">kernel=</span><span class="st">"gaussian"</span>) </span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_start_bw.km)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Let us try to plot the kernel density graphs with the different bandwidth selection method.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>kde_start_bw_diggle.km <span class="ot">&lt;-</span> <span class="fu">density</span>(start_grab_ppp.km,</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">sigma=</span>bw.diggle,</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>                              <span class="at">edge=</span><span class="cn">TRUE</span>,</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>                            <span class="at">kernel=</span><span class="st">"gaussian"</span>) </span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>kde_start_bw_cvl.km <span class="ot">&lt;-</span> <span class="fu">density</span>(start_grab_ppp.km,</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>                              <span class="at">sigma=</span>bw.CvL,</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>                              <span class="at">edge=</span><span class="cn">TRUE</span>,</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>                            <span class="at">kernel=</span><span class="st">"gaussian"</span>) </span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>kde_start_bw_scott.km <span class="ot">&lt;-</span> <span class="fu">density</span>(start_grab_ppp.km,</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>                              <span class="at">sigma=</span>bw.scott,</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>                              <span class="at">edge=</span><span class="cn">TRUE</span>,</span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>                            <span class="at">kernel=</span><span class="st">"gaussian"</span>) </span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>kde_start_bw_ppl.km <span class="ot">&lt;-</span> <span class="fu">density</span>(start_grab_ppp.km,</span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>                              <span class="at">sigma=</span>bw.ppl,</span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>                              <span class="at">edge=</span><span class="cn">TRUE</span>,</span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>                            <span class="at">kernel=</span><span class="st">"gaussian"</span>) </span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_start_bw_diggle.km, <span class="at">main =</span><span class="st">"bw.diggle"</span>)</span>
+<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_start_bw_cvl.km, <span class="at">main =</span><span class="st">"bw.cvl"</span>)</span>
+<span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_start_bw_scott.km, <span class="at">main =</span><span class="st">"bw.scott"</span>)</span>
+<span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_start_bw_ppl.km, <span class="at">main =</span><span class="st">"bw.ppl"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>kde_start_adaptive <span class="ot">&lt;-</span> <span class="fu">adaptive.density</span>(start_grab_ppp.km, <span class="at">method=</span><span class="st">"kernel"</span>)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_start_adaptive)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Since the starting points of the trips are independent of each other, it is more suitable for us to use <em>bw.diggle()</em> or <em>bw.ppl()</em> to understand about the starting location of the Grab taxi. Moreover, since we are analyzing geographical points that are</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>gridded_kde_start <span class="ot">&lt;-</span> <span class="fu">as.SpatialGridDataFrame.im</span>(kde_start_bw.km)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>kde_start_bw_raster <span class="ot">&lt;-</span> <span class="fu">raster</span>(gridded_kde_start)</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>kde_start_bw_raster</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>class      : RasterLayer 
+dimensions : 128, 128, 16384  (nrow, ncol, ncell)
+resolution : 0.4162063, 0.2250614  (x, y)
+extent     : 2.667538, 55.94194, 21.44847, 50.25633  (xmin, xmax, ymin, ymax)
+crs        : NA 
+source     : memory
+names      : v 
+values     : -3.745309e-13, 2295.244  (min, max)</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">projection</span>(kde_start_bw_raster) <span class="ot">&lt;-</span> <span class="fu">CRS</span>(<span class="st">"+init=EPSG:3414"</span>)</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>kde_start_bw_raster</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>class      : RasterLayer 
+dimensions : 128, 128, 16384  (nrow, ncol, ncell)
+resolution : 0.4162063, 0.2250614  (x, y)
+extent     : 2.667538, 55.94194, 21.44847, 50.25633  (xmin, xmax, ymin, ymax)
+crs        : +proj=tmerc +lat_0=1.36666666666667 +lon_0=103.833333333333 +k=1 +x_0=28001.642 +y_0=38744.572 +ellps=WGS84 +units=m +no_defs 
+source     : memory
+names      : v 
+values     : -3.745309e-13, 2295.244  (min, max)</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(kde_start_bw_raster) <span class="sc">+</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_raster</span>() <span class="sc">+</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tm_layout</span>(<span class="at">legend.position =</span> <span class="fu">c</span>(<span class="st">"right"</span>, <span class="st">"bottom"</span>), <span class="at">frame =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex01_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
 </section>
 <section id="network-kernel-density-estimation-nkde" class="level1">
 <h1>Network Kernel Density Estimation (NKDE)</h1>
