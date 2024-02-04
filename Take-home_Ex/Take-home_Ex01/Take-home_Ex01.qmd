@@ -38,7 +38,8 @@ In this Take Home exercise, we will be applying appropriate spatial point patter
 -   **arrow** - enables efficient data interchange between different systems and languages by standardizing how data is represented in memory
 
 ```{r}
-pacman::p_load(sf, spatstat, raster, maptools, tmap, tidyverse, arrow)
+#| code-summary: "Load the necessary packages"
+pacman::p_load(sf, spatstat, raster, maptools, tmap, tidyverse, arrow, spNetwork, viridis, classInt, colorspace, gifski)
 ```
 
 ## Aspatial Data
@@ -47,9 +48,8 @@ pacman::p_load(sf, spatstat, raster, maptools, tmap, tidyverse, arrow)
 
 ```{r}
 #| code-summary: "Read the Grab taxi location points dataset"
+#| eval: false
 grab <- open_dataset("data/aspatial/GrabPosisi") |> as_tibble()
-#grab <- read_parquet("data/aspatial/GrabPosisi/part-00000-8bbff892-97d2-4011-9961-703e38972569.c000.snappy.parquet")
-grab
 ```
 
 ## Geospatial Data
@@ -77,6 +77,8 @@ mpsz2019 <- st_read("data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.g
 As we want to find the starting and ending points of the Grab taxi location, we need to find the starting and ending time of the trip. However, the current *pingtimestamp* is in the integer format, so that currently it is not that readable. As such, we need to transform the data type of *pingtimestamp* into date-time format.
 
 ```{r}
+#| code-summary: "Convert data type from integer(int) to date-time(dttm)"
+#| eval: false
 grab$pingtimestamp <- as_datetime(grab$pingtimestamp)
 glimpse(grab)
 ```
@@ -86,6 +88,8 @@ glimpse(grab)
 Now we find the starting location by arranging the pingtimestamp in an ascending order for each trip and get the earliest time.
 
 ```{r}
+#| code-summary: "Find the start of the trip and put it into a new dataframe"
+#| eval: false
 start_grab <- grab %>%
   group_by(trj_id) %>% # group based on the trips
   arrange(pingtimestamp) %>% # arrange the time in ascending order
@@ -95,8 +99,6 @@ start_grab <- grab %>%
                         abbr = TRUE),
          start_hr = hour(pingtimestamp),
          day = factor(mday(pingtimestamp)))
-
-start_grab
 ```
 
 #### **Finding the end of the trip**
@@ -104,6 +106,8 @@ start_grab
 We also need to find the ending location by arranging the pingtimestamp in an descending order for each trip and get the latest time.
 
 ```{r}
+#| code-summary: "Find the end of the trip and put it into a new dataframe"
+#| eval: false
 end_grab <- grab %>%
   group_by(trj_id) %>% # group based on the trips
   arrange(desc(pingtimestamp)) %>% # arrange the time in descending order
@@ -122,6 +126,8 @@ end_grab
 After finding the starting and ending timing for each trip, we want to make the two dataframes to be an sf data type to be able to process it with the other files. First, we need to change it to an sf data type using the *st_as_sf()* function to change the longitude(rawlng) and latitude(rawlat) of the starting locations into points. Then we transform the projection coordinate system to Singapore's.
 
 ```{r}
+#| code-summary: "Converting the start and end dataframes into sf"
+#| eval: false
 start_sf <- st_as_sf(start_grab,
                       coords = c("rawlng", "rawlat"),
                       crs = 4326) |>
@@ -135,21 +141,19 @@ end_sf <- st_as_sf(end_grab,
 
 #### **Save the sf into RDS and call to use**
 
+As the dataset can be big and it takes a long time to load,
+
 ```{r}
+#| code-summary: "Save the start_sf and end_sf as RDS"
+#| eval: false
 saveRDS(start_sf, file = "start_sf.rds")
 saveRDS(end_sf, file = "end_sf.rds")
 ```
 
 ```{r}
+#| code-summary: "Read the start_sf and end_sf RDS"
 start_sf <- readRDS("start_sf.rds")
 end_sf <- readRDS("end_sf.rds")
-```
-
-#### **Convert the dataframe into ppp and find for any duplicates**
-
-```{r}
-start_ppp <- as.ppp(start_sf)
-any(duplicated(start_ppp))
 ```
 
 ## Geospatial Data
@@ -182,6 +186,7 @@ However, the projection mentioned above does not fit the Singapore's projection,
 ### road
 
 ```{r}
+#| code-summary: "Change the projection of the road data into Singapore's"
 road <- st_transform(road, 3414)
 st_crs(road)
 ```
@@ -189,13 +194,14 @@ st_crs(road)
 ### mpsz2019
 
 ```{r}
+#| code-summary: "Change the projection of the road data into Singapore's"
 mpsz2019 <- st_zm(mpsz2019, zm="Z")
 mpsz2019 <- st_transform(mpsz2019, 3414)
 st_crs(mpsz2019)
 ```
 :::
 
-#### **Set the Singapore boundary**
+#### **Set the Singapore Mainland boundary**
 
 We already set the projection coordinate system for *mpsz2019* and *road* to the Singapore's projected coordinate system. With this, we can find the boundary for Singapore using *st_union()* of the *mpsz2019*.
 
@@ -241,13 +247,68 @@ sg_road <- readRDS("sg_road.rds")
 plot(sg_road["geometry"])
 ```
 
+The plot above shows all the roads that are available in Singapore. It can also be divided into classes as seen below.
+
+```{r}
+classes <- list()
+for (class in unique(sg_road$fclass)){
+  classes[[class]] <- qtm(sg_road |> filter(sg_road$fclass == class)) +
+    tm_layout(main.title = class)
+}
+
+tmap_arrange(classes)
+```
+
+As we can see from the plot above, there are a lot of roads available in Singapore. However, not all roads can be used by cars, and some of the roads are not accessible by the passengers. As such, we need to filter out the roads so that we only use the roads that can be accessible as a pick-up point, which is the starting location of the trip.
+
+```{r}
+sg_road_filtered <- sg_road %>% 
+  filter(sg_road$fclass %in% c('primary', 'secondary', 'residential', 'tertiary', 'trunk', 'motorway', 'motorway_link', 'primary_link', 'secondary_link', 'tertiary_link', 'trunk_link', 'unclassified'))
+plot(sg_road_filtered["geometry"])
+```
+
+We can save *sg_road_filtered* into an RDS file to load it quicker in the future.
+
+```{r}
+#| eval: false
+saveRDS(sg_road_filtered, "sg_road_filtered.rds")
+```
+
+```{r}
+sg_road_filtered <- readRDS("sg_road_filtered.rds")
+```
+
+## Combination of Aspatial and Geospatial Data
+
+After getting the right data types and formats of the aspatial and geospatial data, it is time for us to combine both data, to see and check if there is still a need for refinement.
+
 ```{r}
 tmap_mode("plot")
 tm_shape(start_sf) +
   tm_dots(col="red") +
-  tm_shape(sg_road) +
+  tm_shape(sg_road_filtered) +
   tm_lines()
 ```
+
+From the plot above, we can see that there are still red dots that lie outside of the mainland of Singapore. This is because we have not filter out the points that lies outside of the mainland. As such, we need to remove these dots to be able to have a more accurate output to our analysis.
+
+```{r}
+start_sf <- st_intersection(sg_boundary, start_sf)
+tmap_mode("plot")
+tm_shape(start_sf) +
+  tm_dots(col="red") +
+  tm_shape(sg_road_filtered) +
+  tm_lines()
+```
+
+After all the data processing to make the data align with each other, we need to change the format of the data to be able to process them for the Kernel Density Estimation (KDE). We start with changing the data type of the *start_sf* into ppp. Then, we check for duplicated data in the data.
+
+```{r}
+start_ppp <- as.ppp(start_sf)
+any(duplicated(start_ppp))
+```
+
+After changing the *start_sf* into ppp, we then need to prepare the owin object of the *sg_boundary*. This can be done by changing the *sg_boundary* from sf -\> Spatial\* classes -\> sp -\> owin.
 
 ```{r}
 sg_boundary_spatial <- as_Spatial(sg_boundary)
@@ -257,6 +318,8 @@ plot(sg_boundary_owin)
 ```
 
 #### **Combining starting points of Grab taxis with the Singapore boundary owin object**
+
+Now, we can combine the *start_ppp* with the *sg_boundary_owin* to prepare the data for the Kernel Density Estimation (KDE)
 
 ```{r}
 start_grab_ppp = start_ppp[sg_boundary_owin]
@@ -300,57 +363,529 @@ kde_start_bw.km <- density(start_grab_ppp.km,
 plot(kde_start_bw.km)
 ```
 
-Let us try to plot the kernel density graphs with the different bandwidth selection method.
+We can see now that the density scale is between 0 to 2000 which now can be more interpretable.
+
+Let us try to plot the kernel density graphs with the different bandwidth selection method. Since the starting points of the trips are independent of each other, it is more suitable for us to use *bw.diggle()* or *bw.ppl()* to understand about the starting location of the Grab taxi.
 
 ```{r}
 kde_start_bw_diggle.km <- density(start_grab_ppp.km,
                               sigma=bw.diggle,
                               edge=TRUE,
                             kernel="gaussian") 
-kde_start_bw_cvl.km <- density(start_grab_ppp.km,
-                              sigma=bw.CvL,
-                              edge=TRUE,
-                            kernel="gaussian") 
-kde_start_bw_scott.km <- density(start_grab_ppp.km,
-                              sigma=bw.scott,
-                              edge=TRUE,
-                            kernel="gaussian") 
 kde_start_bw_ppl.km <- density(start_grab_ppp.km,
                               sigma=bw.ppl,
                               edge=TRUE,
                             kernel="gaussian") 
-par(mfrow=c(2, 2))
+par(mfrow=c(1, 2))
 plot(kde_start_bw_diggle.km, main ="bw.diggle")
-plot(kde_start_bw_cvl.km, main ="bw.cvl")
-plot(kde_start_bw_scott.km, main ="bw.scott")
 plot(kde_start_bw_ppl.km, main ="bw.ppl")
 ```
 
+We are analyzing geographical points that may have more than one clusters. As such, it is better for us to use *bw.ppl()* as the automatic bandwidth selection method.
+
+This is because according to Baddeley et. (2016), for data with patterns consisting of predominantly of tight clusters, *bw.ppl()* tends to product more appropriate values. On the other hand, *bw.diggle()* works best to detecting a single tight cluster in the midst of random noise.
+
 ```{r}
-kde_start_adaptive <- adaptive.density(start_grab_ppp.km, method="kernel")
-plot(kde_start_adaptive)
+#| code-summary: "Chosen bandwidth using bw.ppl()"
+bw.ppl(start_grab_ppp.km)
 ```
 
-Since the starting points of the trips are independent of each other, it is more suitable for us to use *bw.diggle()* or *bw.ppl()* to understand about the starting location of the Grab taxi. Moreover, since we are analyzing geographical points that are
+#### **Visualizing the output in tmap**
+
+Before being able to plot it into the tmap, we need to change the object into a raster. We need to change the KDE into a grid object before changing into a raster object.
 
 ```{r}
-gridded_kde_start <- as.SpatialGridDataFrame.im(kde_start_bw.km)
+gridded_kde_start <- as.SpatialGridDataFrame.im(kde_start_bw_ppl.km)
 kde_start_bw_raster <- raster(gridded_kde_start)
 kde_start_bw_raster
 ```
 
+As the crs in the above code is NA, we need to assign the object with the right crs, which is EPSG:3414 in this case. Do not forget to also input the units used in the object, in this case is kilometers.
+
 ```{r}
-projection(kde_start_bw_raster) <- CRS("+init=EPSG:3414")
+projection(kde_start_bw_raster) <- CRS("+init=EPSG:3414 +units=km")
 kde_start_bw_raster
+```
+
+After putting the crs, now we can plot the raster object on the map using tmap.
+
+```{r}
+tmap_mode("view")
+tm_basemap("OpenStreetMap") +
+  tm_shape(kde_start_bw_raster) +
+  tm_raster("v", palette = "BuGn", title="", alpha=0.7)
+  
 ```
 
 ```{r}
 tmap_mode("plot")
-tm_shape(kde_start_bw_raster) +
-    tm_raster() +
-    tm_layout(legend.position = c("right", "bottom"), frame = FALSE)
 ```
 
-# Network Kernel Density Estimation (NKDE)
+```{r}
+#| code-summary: "Average Intensity of the starting location in Mainland Singapore"
+intensity(start_grab_ppp.km)
+```
 
-# Temporal Network Kernel Density Estimation (TNKDE)
+#### **Checking for each region**
+
+From the map above, we can see that there are clusters on the East, Central, North and West Region of Singapore, with the most concentrated in the East region, around Changi Airport Area. Let's take a look further into each of the regions
+
+First, we find the boundary of each region.
+
+```{r}
+#| code-summary: "Find region boundary"
+east <- mpsz2019 %>% filter(grepl("EAST REGION", Description)) %>% filter(!grepl("ISLAND", Description)) %>% st_union
+central <- mpsz2019 %>% filter(grepl("CENTRAL REGION", Description)) %>% filter (!grepl("ISLAND", Description)) %>% st_union
+north <- mpsz2019 %>% filter(grepl("NORTH REGION", Description)) %>% filter (!grepl("ISLAND", Description)) %>% st_union
+west <- mpsz2019 %>% filter(grepl("WEST REGION", Description)) %>% filter (!grepl("ISLAND", Description)) %>% st_union
+
+par(mfrow=c(2, 2))
+plot(east)
+plot(central)
+plot(north)
+plot(west)
+```
+
+Next, we find the roads in each region.
+
+```{r}
+#| code-summary: "Find road in each region"
+#| eval: false
+east_road <- st_intersection(sg_road_filtered, east) %>% st_cast("LINESTRING")
+central_road <- st_intersection(sg_road_filtered, central) %>% st_cast("LINESTRING")
+west_road <- st_intersection(sg_road_filtered, west) %>% st_cast("LINESTRING")
+north_road <- st_intersection(sg_road_filtered, north) %>% st_cast("LINESTRING")
+```
+
+As the loading time to get all the roads in each region is long, we save these data as an RDS and load it.
+
+```{r}
+#| eval: false
+saveRDS(east_road, "east_road.rds")
+saveRDS(central_road, "central_road.rds")
+saveRDS(west_road, "west_road.rds")
+saveRDS(north_road, "north_road.rds")
+```
+
+```{r}
+east_road <- readRDS("east_road.rds")
+central_road <- readRDS("central_road.rds")
+west_road <- readRDS("west_road.rds")
+north_road <- readRDS("north_road.rds")
+```
+
+```{r}
+par(mfrow=c(2, 2))
+plot(east_road["geometry"])
+plot(central_road["geometry"])
+plot(west_road["geometry"])
+plot(north_road["geometry"])
+```
+
+Then, we filter out the points that lies in each region.
+
+```{r}
+#| code-summary: "Filter out points in each region"
+#| eval: false
+east_points <- st_intersection(start_sf, east)
+central_points <- st_intersection(start_sf, central)
+west_points <- st_intersection(start_sf, west)
+north_points <- st_intersection(start_sf, north)
+```
+
+```{r}
+#| eval: false
+saveRDS(east_points, "east_points.rds")
+saveRDS(central_points, "central_points.rds")
+saveRDS(west_points, "west_points.rds")
+saveRDS(north_points, "north_points.rds")
+```
+
+```{r}
+east_points <- readRDS("east_points.rds")
+central_points <- readRDS("central_points.rds")
+west_points <- readRDS("west_points.rds")
+north_points <- readRDS("north_points.rds")
+```
+
+```{r}
+east_map <- tm_shape(east_points) +
+  tm_dots(col="red") +
+  tm_shape(east_road) +
+  tm_lines()
+
+central_map <- tm_shape(central_points) +
+  tm_dots(col="red") +
+  tm_shape(central_road) +
+  tm_lines()
+
+west_map <- tm_shape(west_points) +
+  tm_dots(col="red") +
+  tm_shape(west_road) +
+  tm_lines()
+
+north_map <- tm_shape(north_points) +
+  tm_dots(col="red") +
+  tm_shape(north_road) +
+  tm_lines()
+
+tmap_arrange(east_map, central_map, west_map, north_map, asp=2, ncol=2)
+```
+
+As we want to analyze the KDE for each region, we need to transform the data points into ppp.
+
+```{r}
+east_ppp <- as.ppp(east_points)
+central_ppp <- as.ppp(central_points)
+west_ppp <- as.ppp(west_points)
+north_ppp <- as.ppp(north_points)
+
+any(duplicated(east_ppp))
+any(duplicated(central_ppp))
+any(duplicated(west_ppp))
+any(duplicated(north_ppp))
+```
+
+We also need to make sure that the points lie inside the boundary of each region. As such, we need to convert the map into owin object.
+
+```{r}
+east_spatial <- as_Spatial(east)
+east_sp <- as(east_spatial, "SpatialPolygons")
+east_owin <- as(east_sp, "owin")
+
+central_spatial <- as_Spatial(central)
+central_sp <- as(central_spatial, "SpatialPolygons")
+central_owin <- as(central_sp, "owin")
+
+west_spatial <- as_Spatial(west)
+west_sp <- as(west_spatial, "SpatialPolygons")
+west_owin <- as(west_sp, "owin")
+
+north_spatial <- as_Spatial(north)
+north_sp <- as(north_spatial, "SpatialPolygons")
+north_owin <- as(north_sp, "owin")
+
+par(mfrow=c(2, 2))
+plot(east_owin)
+plot(central_owin)
+plot(west_owin)
+plot(north_owin)
+```
+
+Same as before when using the mainland Singapore data, we need to rescale the scale of the distance from meters into kilometers to make the density scale more interpretable.
+
+```{r}
+east_ppp.km = rescale(east_ppp[east_owin], 1000, "km")
+central_ppp.km = rescale(central_ppp[central_owin], 1000, "km")
+west_ppp.km = rescale(west_ppp[west_owin], 1000, "km")
+north_ppp.km = rescale(north_ppp[north_owin], 1000, "km")
+
+par(mfrow=c(2, 2))
+plot(east_ppp.km)
+plot(central_ppp.km)
+plot(west_ppp.km)
+plot(north_ppp.km)
+```
+
+Then, we plot the kernel density map for each region.
+
+```{r}
+kde_east_bw <- density(east_ppp.km,
+                              sigma=bw.ppl,
+                              edge=TRUE,
+                            kernel="gaussian")
+kde_central_bw <- density(central_ppp.km,
+                              sigma=bw.ppl,
+                              edge=TRUE,
+                            kernel="gaussian")
+kde_west_bw <- density(west_ppp.km,
+                              sigma=bw.ppl,
+                              edge=TRUE,
+                            kernel="gaussian")
+kde_north_bw <- density(north_ppp.km,
+                              sigma=bw.ppl,
+                              edge=TRUE,
+                            kernel="gaussian")
+
+par(mfrow=c(2, 2))
+plot(kde_east_bw)
+plot(kde_central_bw)
+plot(kde_west_bw)
+plot(kde_north_bw)
+```
+
+```{r}
+#| code-summary: "Valuating the KDE intensity for each region"
+intensity(east_ppp.km) 
+intensity(central_ppp.km) 
+intensity(west_ppp.km)
+intensity(north_ppp.km)
+```
+
+From the above values of the intensity of the density of the starting location points, we can see that most of the trips starts from the central area, as seen from the highest intensity value of 70.09501. Although in the earlier raster map we see that the area that has a lot of starting locations is on the East, it does not mean that the kernel density estimation in the East area is higher than that of the other regions. The cluster only means that that specific area, in this case is Changi Airport, has a more concentrated ratio of starting points as compared to other locations. As such, the starting points of the Grab Taxi are mostly located in the central region, followed by the east region.
+
+# Network Kernel Density Estimation (NetKDE)
+
+## Focusing on a more focused area
+
+From our analysis for KDE, it is seen that the Central and the East region are the regions where many of the starting points are located. As such, it is much more interesting if we zoom closer to one part of the regions, in this case I chose Downtown and Changi, to know more about the trends of these starting locations.
+
+First, we need to prepare the data so that it can be analyzed further to get the NetKDE of these areas.
+
+```{r}
+downtown <- mpsz2019 %>% filter(grepl("DOWNTOWN", Description)) %>% filter(!grepl("ISLAND", Description)) %>% st_union
+downtown_road <- st_intersection(sg_road_filtered, downtown) %>% st_cast("LINESTRING")
+downtown_points <- st_intersection(start_sf, downtown) %>% st_cast("POINT")
+downtown_map <- tm_shape(downtown_points) +
+  tm_dots(col="red") +
+  tm_shape(downtown_road) +
+  tm_lines()
+
+changi <- mpsz2019 %>% filter(grepl("CHANGI", Description)) %>% filter(!grepl("ISLAND", Description)) %>% st_union
+changi_road <- st_intersection(sg_road_filtered, changi) %>% st_cast("LINESTRING")
+changi_points <- st_intersection(start_sf, changi) %>% st_cast("POINT")
+changi_map <- tm_shape(changi_points) +
+  tm_dots(col="red") +
+  tm_shape(changi_road) +
+  tm_lines()
+
+tmap_arrange(downtown_map, changi_map, asp=1, ncol=2)
+
+```
+
+## Preparing lixels objects and generating line centre points
+
+To compute the NetKDE, we need to cut the SpatialLines into lixels with a specified minimal distance. This can be done using the *lixelize_lines()* of **spNetwork** package. We then generate a SpatialPointsDataFrame with line center points with *lines_center()* of **spNetwork**.
+
+```{r}
+lixels_downtown <- lixelize_lines(downtown_road, 750, mindist = 350)
+samples_downtown <- lines_center(lixels_downtown)
+
+lixels_changi <- lixelize_lines(changi_road, 750, mindist = 350)
+samples_changi <- lines_center(lixels_changi)
+```
+
+I indicated the length of lixel, *lx_length*, to 750m and the minimum length of a lixel, *mindist*, to be 350m.
+
+## Performing NetKDE
+
+This is the reference for the [*nkde()*](https://search.r-project.org/CRAN/refmans/spNetwork/html/nkde.html) function of the spNetwork package.
+
+#### Downtown
+
+```{r}
+#| eval: false
+densities_downtown <- nkde(downtown_road, 
+                  events = downtown_points, 
+                  kernel_name="gaussian", 
+                  samples = samples_downtown, 
+                  method = "simple", 
+                  bw = 300, 
+                  div = "bw", 
+                  w = rep(1, nrow(downtown_points)), 
+                  digits = 1, 
+                  tol = 1, 
+                  grid_shape = c(1,1), 
+                  max_depth = 8, 
+                  agg = 5, 
+                  sparse = TRUE, 
+                  verbose = FALSE)
+samples_downtown$density <- densities_downtown * 1000
+lixels_downtown$density <- densities_downtown * 1000
+```
+
+```{r}
+#| eval: false
+saveRDS(samples_downtown, "samples_downtown.rds")
+saveRDS(lixels_downtown, "lixels_downtown.rds")
+```
+
+```{r}
+samples_downtown <- readRDS("samples_downtown.rds")
+lixels_downtown <- readRDS("lixels_downtown.rds")
+```
+
+
+```{r}
+tmap_mode('view')
+tm_basemap("OpenStreetMap") +
+tm_shape(lixels_downtown) +
+  tm_lines(col="density", palette = "Reds", lwd=5) +
+tm_shape(downtown_points) +
+  tm_dots()+
+tm_shape(downtown) + 
+  tm_borders()
+```
+```{r}
+tmap_mode('plot')
+```
+
+
+#### Changi
+
+```{r}
+#| eval: false
+densities_changi <- nkde(changi_road, 
+                  events = changi_points, 
+                  kernel_name="gaussian", 
+                  samples = samples_changi, 
+                  method = "simple", 
+                  bw = 300, 
+                  div = "bw", 
+                  w = rep(1, nrow(changi_points)), 
+                  digits = 1, 
+                  tol = 1, 
+                  grid_shape = c(1,1), 
+                  max_depth = 8, 
+                  agg = 5, 
+                  sparse = TRUE, 
+                  verbose = FALSE)
+samples_changi$density <- densities_changi * 1000
+lixels_changi$density <- densities_changi * 1000
+```
+
+```{r}
+#| eval: false
+saveRDS(samples_changi, "samples_changi.rds")
+saveRDS(lixels_changi, "lixels_changi.rds")
+```
+
+```{r}
+samples_changi <- readRDS("samples_changi.rds")
+lixels_changi <- readRDS("lixels_changi.rds")
+```
+
+
+```{r}
+tmap_mode('view')
+tm_basemap("OpenStreetMap") +
+tm_shape(lixels_changi)+
+  tm_lines(col="density", palette = "Reds", lwd=5)+
+tm_shape(changi_points)+
+  tm_dots()
+```
+```{r}
+tmap_mode('plot')
+```
+
+
+## Analysis
+
+From the two plots above, we can see that more roads in Downtown have an orange to red colour as compared to Changi, indicating that many of the starting location points are located across the roads in Downtown. This also correlates with the fact that the Downtown area has more visitors, such as tourists, office workers, and students, who are frequent Grab ride-hailers. As compared to Changi, the only place that is concentrated with the starting points is in the Airport where many visitors are hailing a Grab ride to town. 
+
+
+# Temporal Network Kernel Density Estimate
+
+As the area in downtown has more starting location points than in Changi, we will do the Temporal Network Kernel Density Estimate in the Downtown area
+
+Firstly, we need to process the *pingtimestamp* of the *downtown_points*, to be able to analyze it based on the duration that we intend to. In this case, we use the hour count.
+
+```{r}
+#| eval: false
+downtown_points$time <- as.POSIXct(hms::as_hms(downtown_points$pingtimestamp))
+start <- as.POSIXct(0)
+downtown_points$time <- as.numeric(difftime(downtown_points$time, start, units='hours'))
+
+
+hours_starts_labs <- as.character(0:23)
+
+hours_starts_num <- difftime(hms::hms(hours = (0:23)), start, units = "hours")
+hours_starts_num <- as.numeric(hours_starts_num)
+```
+
+```{r}
+#| eval: false
+ggplot(downtown_points) +
+  geom_histogram(aes(x = time), color = 'white', bins = 24) + 
+  scale_x_continuous(breaks = hours_starts_num, labels = hours_starts_labs)
+```
+
+```{r}
+#| eval: false
+w <- rep(1, nrow(downtown_points))
+samples <- seq(0, max(downtown_points$time))
+
+time_kernel_values <- data.frame(
+  bw_1 = tkde(downtown_points$time, w = w, samples = samples, bw = 1, kernel_name = "quartic"),
+  bw_2 = tkde(downtown_points$time, w = w, samples = samples, bw = 2, kernel_name = "quartic"),
+  bw_3 = tkde(downtown_points$time, w = w, samples = samples, bw = 3, kernel_name = "quartic"),
+  bw_4 = tkde(downtown_points$time, w = w, samples = samples, bw = 4, kernel_name = "quartic"),
+  bw_5 = tkde(downtown_points$time, w = w, samples = samples, bw = 5, kernel_name = "quartic"),
+  bw_6 = tkde(downtown_points$time, w = w, samples = samples, bw = 6, kernel_name = "quartic"),
+  time = samples)
+```
+
+```{r}
+#| eval: false
+df_time <- reshape2::melt(time_kernel_values,id.vars = "time")
+df_time$variable <- as.factor(df_time$variable)
+```
+
+```{r}
+#| eval: false
+ggplot(data = df_time) + 
+  geom_line(aes(x = time, y = value)) + 
+  scale_x_continuous(breaks = hours_starts_num, labels = hours_starts_labs) +
+  facet_wrap(vars(variable), ncol=2, scales = "free") + 
+  theme(axis.text = element_text(size = 5))
+```
+
+## Visualiation of the Spatial-Temporal Pattern 
+
+```{r}
+#| eval: false
+sample_time <- seq(0, max(downtown_points$time), 1)
+```
+
+```{r}
+#| eval: false
+tnkde_densities <- tnkde(lines = downtown_road,
+                         events = downtown_points,
+                         time_field = "time",
+                         w = rep(1, nrow(downtown_points)), 
+                         samples_loc = samples_downtown,
+                         samples_time = sample_time, 
+                         kernel_name = "quartic",
+                         bw_net = 700, bw_time = 1,
+                         adaptive = TRUE,
+                         trim_bw_net = 900,
+                         trim_bw_time = 1.5,
+                         method = "discontinuous",
+                         div = "bw", max_depth = 10,
+                         digits = 2, tol = 0.01,
+                         agg = 15, grid_shape = c(1,1), 
+                         verbose  = FALSE)
+```
+
+```{r}
+#| eval: false
+all_densities <- c(tnkde_densities$k)
+color_breaks <- classIntervals(all_densities, n = 10, style = "kmeans")
+```
+
+```{r}
+#| eval: false
+all_maps <- lapply(1:ncol(tnkde_densities$k), function(i){
+  time <- hms::hms(minutes = sample_time[[i]])
+  
+  samples_downtown$density <- tnkde_densities$k[,i]
+  
+  map1 <- tm_shape(downtown_road) +
+    tm_lines(alpha = 0.5) +
+    tm_shape(samples_downtown) + 
+    tm_dots(col = "density", size = 0.01, breaks = color_breaks$brks, palette = sequential_hcl(10, 'Purple-Blue')) + 
+    tm_layout(legend.show=FALSE, main.title = as.character(time), main.title.size = 0.5)
+  
+  return(map1)
+})
+
+tmap_animation(all_maps, filename = "downtown_points.gif", 
+               width = 1000, height = 1000, dpi = 300, delay = 50)
+```
+
+```{r}
+knitr::include_graphics("downtown_points.gif")
+```
+## Analysis
+
+At the hours of 9 to 11, it is the most demand for Grab as we can see from the gif that the blue colours almost fill up the map on the 9th, 10th and 11th hour. 
