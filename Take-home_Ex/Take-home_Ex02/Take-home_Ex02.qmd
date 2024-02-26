@@ -1,0 +1,11 @@
+---
+title: "Take Home Exercise 2"
+author: "Emily Aurelia"
+format:
+  html:
+    toc-depth: 4
+execute: 
+  warning: false #to remove the warning in the webpage
+  freeze: true
+date: "`r Sys.Date()`"
+---
