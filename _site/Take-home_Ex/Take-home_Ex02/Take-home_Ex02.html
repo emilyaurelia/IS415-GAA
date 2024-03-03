@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Emily Aurelia">
+<meta name="dcterms.date" content="2024-02-27">
+
+<title>IS415-GAA - Take Home Exercise 2: Application of Spatial and Spatio-temporal Analysis Methods to Discover the Distribution of Dengue Fever in Tainan City, Taiwan</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">IS415-GAA</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-hands-on-exercise" role="button" data-bs-toggle="dropdown" aria-expanded="false" rel="" target="">
+ <span class="menu-text">Hands-on Exercise</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-hands-on-exercise">    
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html" rel="" target="">
+ <span class="dropdown-text">Hands-on Exercise 1</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex02/Hands-on_Ex02.html" rel="" target="">
+ <span class="dropdown-text">Hands-on Exercise 2</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex03/Hands-on_Ex03.html" rel="" target="">
+ <span class="dropdown-text">Hands-on Exercise 3</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04.html" rel="" target="">
+ <span class="dropdown-text">Hands-on Exercise 4</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05.html" rel="" target="">
+ <span class="dropdown-text">Hands-on Exercise 5</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex06/Hands-on_Ex06.html" rel="" target="">
+ <span class="dropdown-text">Hands-on Exercise 6</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-in-class-exercise" role="button" data-bs-toggle="dropdown" aria-expanded="false" rel="" target="">
+ <span class="menu-text">In-Class Exercise</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-in-class-exercise">    
+        <li>
+    <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex02/In-class_Ex02.html" rel="" target="">
+ <span class="dropdown-text">In-Class Exercise 2</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex03/In-class_Ex03.html" rel="" target="">
+ <span class="dropdown-text">In-Class Exercise 3</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex04/In-class_Ex04.html" rel="" target="">
+ <span class="dropdown-text">In-Class Exercise 4</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex05/In-class_Ex05.html" rel="" target="">
+ <span class="dropdown-text">In-Class Exercise 5</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-take-home-exercise" role="button" data-bs-toggle="dropdown" aria-expanded="false" rel="" target="">
+ <span class="menu-text">Take Home Exercise</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-take-home-exercise">    
+        <li>
+    <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html" rel="" target="">
+ <span class="dropdown-text">Take Home Exercise 1</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Take-home_Ex/Take-home_Ex02/Take-home_Ex02.html" rel="" target="">
+ <span class="dropdown-text">Take Home Exercise 2</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html" rel="" target="">
+ <span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html" rel="" target="">
+ <span class="menu-text">About Emily</span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background">Background</a></li>
+  <li><a href="#motivation" id="toc-motivation" class="nav-link" data-scroll-target="#motivation">Motivation</a></li>
+  <li><a href="#packages" id="toc-packages" class="nav-link" data-scroll-target="#packages">Packages</a></li>
+  <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data">Data</a>
+  <ul>
+  <li><a href="#aspatial-data" id="toc-aspatial-data" class="nav-link" data-scroll-target="#aspatial-data">Aspatial Data</a></li>
+  <li><a href="#geospatial-data" id="toc-geospatial-data" class="nav-link" data-scroll-target="#geospatial-data">Geospatial Data</a></li>
+  </ul></li>
+  <li><a href="#data-preprocessing" id="toc-data-preprocessing" class="nav-link" data-scroll-target="#data-preprocessing">Data Preprocessing</a>
+  <ul>
+  <li><a href="#aspatial-data-1" id="toc-aspatial-data-1" class="nav-link" data-scroll-target="#aspatial-data-1">Aspatial Data</a>
+  <ul class="collapse">
+  <li><a href="#filter-by-dates-of-the-epidemiology-week" id="toc-filter-by-dates-of-the-epidemiology-week" class="nav-link" data-scroll-target="#filter-by-dates-of-the-epidemiology-week">Filter by Dates of the Epidemiology Week</a></li>
+  <li><a href="#remove-unused-columns" id="toc-remove-unused-columns" class="nav-link" data-scroll-target="#remove-unused-columns">Remove Unused Columns</a></li>
+  <li><a href="#checking-and-handling-of-missing-data" id="toc-checking-and-handling-of-missing-data" class="nav-link" data-scroll-target="#checking-and-handling-of-missing-data">Checking and Handling of Missing Data</a></li>
+  <li><a href="#change-the-data-type-of-the-x-and-y-coordinates" id="toc-change-the-data-type-of-the-x-and-y-coordinates" class="nav-link" data-scroll-target="#change-the-data-type-of-the-x-and-y-coordinates">Change the Data Type of the x and y coordinates</a></li>
+  <li><a href="#change-the-dengue-dataset-into-sf" id="toc-change-the-dengue-dataset-into-sf" class="nav-link" data-scroll-target="#change-the-dengue-dataset-into-sf">Change the Dengue Dataset into sf</a></li>
+  </ul></li>
+  <li><a href="#geospatial-data-1" id="toc-geospatial-data-1" class="nav-link" data-scroll-target="#geospatial-data-1">Geospatial Data</a>
+  <ul class="collapse">
+  <li><a href="#inspect-and-narrow-down-the-area-of-focus" id="toc-inspect-and-narrow-down-the-area-of-focus" class="nav-link" data-scroll-target="#inspect-and-narrow-down-the-area-of-focus">Inspect and Narrow Down the Area of Focus</a></li>
+  <li><a href="#setting-the-boundaries" id="toc-setting-the-boundaries" class="nav-link" data-scroll-target="#setting-the-boundaries">Setting the Boundaries</a></li>
+  </ul></li>
+  <li><a href="#combining-aspatial-data-and-geospatial-data" id="toc-combining-aspatial-data-and-geospatial-data" class="nav-link" data-scroll-target="#combining-aspatial-data-and-geospatial-data">Combining Aspatial Data and Geospatial Data</a>
+  <ul class="collapse">
+  <li><a href="#find-dengue-cases-within-the-focus-area" id="toc-find-dengue-cases-within-the-focus-area" class="nav-link" data-scroll-target="#find-dengue-cases-within-the-focus-area">Find Dengue Cases within the Focus Area</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#exploratory-data-analysis" id="toc-exploratory-data-analysis" class="nav-link" data-scroll-target="#exploratory-data-analysis">Exploratory Data Analysis</a>
+  <ul>
+  <li><a href="#plot-time-series-graph-on-the-cases" id="toc-plot-time-series-graph-on-the-cases" class="nav-link" data-scroll-target="#plot-time-series-graph-on-the-cases">Plot time series graph on the cases</a></li>
+  <li><a href="#plot-heat-map-on-the-graph-to-see-the-area-that-is-concentrated-on-having-the-dengue-cases" id="toc-plot-heat-map-on-the-graph-to-see-the-area-that-is-concentrated-on-having-the-dengue-cases" class="nav-link" data-scroll-target="#plot-heat-map-on-the-graph-to-see-the-area-that-is-concentrated-on-having-the-dengue-cases">Plot heat map on the graph to see the area that is concentrated on having the dengue cases</a></li>
+  </ul></li>
+  <li><a href="#global-measures-of-spatial-autocorrelation" id="toc-global-measures-of-spatial-autocorrelation" class="nav-link" data-scroll-target="#global-measures-of-spatial-autocorrelation">Global Measures of Spatial Autocorrelation</a>
+  <ul>
+  <li><a href="#computing-continguity-spatial-weights-and-create-row-standardised-weights-matrix" id="toc-computing-continguity-spatial-weights-and-create-row-standardised-weights-matrix" class="nav-link" data-scroll-target="#computing-continguity-spatial-weights-and-create-row-standardised-weights-matrix">Computing Continguity Spatial Weights and create row-standardised weights matrix</a></li>
+  <li><a href="#morans-i" id="toc-morans-i" class="nav-link" data-scroll-target="#morans-i">Moran’s I</a>
+  <ul class="collapse">
+  <li><a href="#morans-i-test" id="toc-morans-i-test" class="nav-link" data-scroll-target="#morans-i-test">Moran’s I test</a></li>
+  <li><a href="#monte-carlo-morans-i" id="toc-monte-carlo-morans-i" class="nav-link" data-scroll-target="#monte-carlo-morans-i">Monte Carlo Moran’s I</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#local-spatial-autocorrelation" id="toc-local-spatial-autocorrelation" class="nav-link" data-scroll-target="#local-spatial-autocorrelation">Local Spatial Autocorrelation</a>
+  <ul>
+  <li><a href="#computing-distance-matrix" id="toc-computing-distance-matrix" class="nav-link" data-scroll-target="#computing-distance-matrix">Computing Distance Matrix</a></li>
+  <li><a href="#computing-local-getis-ord-gi" id="toc-computing-local-getis-ord-gi" class="nav-link" data-scroll-target="#computing-local-getis-ord-gi">Computing Local Getis-Ord Gi*</a></li>
+  <li><a href="#visualizing-the-local-getis-ord-gi" id="toc-visualizing-the-local-getis-ord-gi" class="nav-link" data-scroll-target="#visualizing-the-local-getis-ord-gi">Visualizing the Local Getis-Ord Gi*</a></li>
+  </ul></li>
+  <li><a href="#emerging-hotspot-analysis" id="toc-emerging-hotspot-analysis" class="nav-link" data-scroll-target="#emerging-hotspot-analysis">Emerging Hotspot Analysis</a>
+  <ul>
+  <li><a href="#data-preparation" id="toc-data-preparation" class="nav-link" data-scroll-target="#data-preparation">Data Preparation</a>
+  <ul class="collapse">
+  <li><a href="#create-empty-dataframe" id="toc-create-empty-dataframe" class="nav-link" data-scroll-target="#create-empty-dataframe">Create empty dataframe</a></li>
+  <li><a href="#combine-the-sf-objects-to-find-cases-in-each-village" id="toc-combine-the-sf-objects-to-find-cases-in-each-village" class="nav-link" data-scroll-target="#combine-the-sf-objects-to-find-cases-in-each-village">Combine the sf objects to find cases in each village</a></li>
+  <li><a href="#create-dataframe-to-compile-all-the-number-of-cases-in-each-village-per-week" id="toc-create-dataframe-to-compile-all-the-number-of-cases-in-each-village-per-week" class="nav-link" data-scroll-target="#create-dataframe-to-compile-all-the-number-of-cases-in-each-village-per-week">Create dataframe to compile all the number of cases in each village per week</a></li>
+  <li><a href="#create-spacetime-object" id="toc-create-spacetime-object" class="nav-link" data-scroll-target="#create-spacetime-object">Create spacetime object</a></li>
+  <li><a href="#activate-the-spacetime-object-into-data" id="toc-activate-the-spacetime-object-into-data" class="nav-link" data-scroll-target="#activate-the-spacetime-object-into-data">Activate the spacetime object into data</a></li>
+  </ul></li>
+  <li><a href="#emerging-hotspot-analysis-1" id="toc-emerging-hotspot-analysis-1" class="nav-link" data-scroll-target="#emerging-hotspot-analysis-1">Emerging Hotspot Analysis</a>
+  <ul class="collapse">
+  <li><a href="#check-for-time-series-cube" id="toc-check-for-time-series-cube" class="nav-link" data-scroll-target="#check-for-time-series-cube">Check for time-series cube</a></li>
+  <li><a href="#computing-spatial-weights" id="toc-computing-spatial-weights" class="nav-link" data-scroll-target="#computing-spatial-weights">Computing Spatial Weights</a></li>
+  <li><a href="#computing-local-gi" id="toc-computing-local-gi" class="nav-link" data-scroll-target="#computing-local-gi">Computing local Gi*</a></li>
+  <li><a href="#mann-kendall-test" id="toc-mann-kendall-test" class="nav-link" data-scroll-target="#mann-kendall-test">Mann-Kendall Test</a></li>
+  <li><a href="#selecting-study-area" id="toc-selecting-study-area" class="nav-link" data-scroll-target="#selecting-study-area">Selecting Study Area</a></li>
+  <li><a href="#ehsa-for-all-the-villages" id="toc-ehsa-for-all-the-villages" class="nav-link" data-scroll-target="#ehsa-for-all-the-villages">EHSA for all the villages</a></li>
+  <li><a href="#plot-the-result-of-emerging-hotspot-analysis" id="toc-plot-the-result-of-emerging-hotspot-analysis" class="nav-link" data-scroll-target="#plot-the-result-of-emerging-hotspot-analysis">Plot the result of emerging hotspot analysis</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Take Home Exercise 2: Application of Spatial and Spatio-temporal Analysis Methods to Discover the Distribution of Dengue Fever in Tainan City, Taiwan</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Emily Aurelia </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">February 27, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="background" class="level1">
+<h1>Background</h1>
+<p>It has been reported that Taiwan had a very high record of dengue fever cases of 26703 in the year 2023. This is the worst outbreak case since 2015, where Taiwan faced the worst dengue fever outbreak with 43,000 dengue cases and 228 deaths. It is reported that more than 80% of the cases occurred in the months fo August to November of 2023 and during the epidemiology week 31 to 50. Most of these dengue cases are reported at Tainan City.</p>
+</section>
+<section id="motivation" class="level1">
+<h1>Motivation</h1>
+<p>As there is a sudden dengue fever outbreak in Taiwan after years of having cases below 200, we need to investigate further if such an outbreak has any correlation with the region that is happening, the time that the outbreak happened, or both. This investigation can help in further understanding the cause of such an outbreak as well as a step to know how to prevent such an outbreak from happening again.</p>
+</section>
+<section id="packages" class="level1">
+<h1>Packages</h1>
+<ul>
+<li><strong>sf -</strong> for importing and handling geospatial data in R</li>
+<li><strong>tidyverse</strong> - for wrangling attribute data in R</li>
+<li><strong>sfdep -</strong> for computing spatial weights, global and local spatial autocorrelation statistics</li>
+<li><strong>tmap -</strong> prepare cartographic quality choropleth map</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, sp, sfdep, tmap, tidyverse, ggplot2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="data" class="level1">
+<h1>Data</h1>
+<section id="aspatial-data" class="level2">
+<h2 class="anchored" data-anchor-id="aspatial-data">Aspatial Data</h2>
+<ul>
+<li><p>Dengue_Daily.csv</p>
+<ul>
+<li>This is an aspatial data of the reported dengue cases in Taiwan since 1998</li>
+</ul></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>dengue <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/aspatial/Dengue_Daily.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="geospatial-data" class="level2">
+<h2 class="anchored" data-anchor-id="geospatial-data">Geospatial Data</h2>
+<ul>
+<li><p>TAIWAN_VILLAGE_2020</p>
+<ul>
+<li>This is a geospatial data of the village boundaries of Taiwan in the form of an ESRI shapefile format. It is already in the Taiwan Geographic Coordinate System.</li>
+</ul></li>
+</ul>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `TAINAN_VILLAGE' from data source 
+  `C:\Users\emily\OneDrive\Documents\SMU\Y3S2\Geospatial Analysis\IS415-GAA\Take-home_Ex\Take-home_Ex02\data\geospatial\TAINAN_VILLAGE.shp' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 649 features and 10 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: 120.0269 ymin: 22.88751 xmax: 120.6563 ymax: 23.41374
+Geodetic CRS:  TWD97</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="data-preprocessing" class="level1">
+<h1>Data Preprocessing</h1>
+<section id="aspatial-data-1" class="level2">
+<h2 class="anchored" data-anchor-id="aspatial-data-1">Aspatial Data</h2>
+<section id="filter-by-dates-of-the-epidemiology-week" class="level3">
+<h3 class="anchored" data-anchor-id="filter-by-dates-of-the-epidemiology-week">Filter by Dates of the Epidemiology Week</h3>
+<p>We are only interested in the epidemiology week 31 to 50 in the year 2023, which is when most of the dengue cases are happening. There is a function from lubridate, <code>epiweek()</code>, which can give the epidemiology week of the specific year. As such, we will use <code>mutate()</code> and <code>epiweek()</code> to create a column, epiweek, to identify the epidemiology week of the dates, and then using the <code>filter()</code> function to filter the data that has the epidemiology week of 31 to 50 in the year 2023.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>dengue <span class="ot">&lt;-</span> dengue <span class="sc">|&gt;</span> </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">EPIWEEK =</span> <span class="fu">epiweek</span>(發病日)) <span class="sc">|&gt;</span> </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">year</span>(發病日) <span class="sc">==</span> <span class="dv">2023</span> <span class="sc">&amp;</span> <span class="fu">between</span>(EPIWEEK, <span class="dv">31</span>, <span class="dv">50</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="remove-unused-columns" class="level3">
+<h3 class="anchored" data-anchor-id="remove-unused-columns">Remove Unused Columns</h3>
+<p>In this case study, we want to focus more on the locations of where the cases occur. As such, there are only 4 columns that we will require, which are:</p>
+<ul>
+<li><p>發病日: Onset date</p></li>
+<li><p>最小統計區中心點X: x-coordinate (longitude)</p></li>
+<li><p>最小統計區中心點Y: y-coordinate (latitude)</p></li>
+<li><p>epiweek: the epidemiology week of the case</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>dengue <span class="ot">&lt;-</span> dengue <span class="sc">|&gt;</span> </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(發病日, 最小統計區中心點X, 最小統計區中心點Y, EPIWEEK)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="checking-and-handling-of-missing-data" class="level3">
+<h3 class="anchored" data-anchor-id="checking-and-handling-of-missing-data">Checking and Handling of Missing Data</h3>
+<p>Let us now check for rows that contains any missing values.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">colSums</span>(<span class="fu">is.na</span>(dengue))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>           發病日 最小統計區中心點X 最小統計區中心點Y           EPIWEEK 
+                0                 0                 0                 0 </code></pre>
+</div>
+</div>
+<p>From the output above, we can see that there are 0 rows that contains missing coordinates. However, we need to see if there are rows that contains any “None” strings.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>dengue_None <span class="ot">&lt;-</span> dengue <span class="sc">|&gt;</span> </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(最小統計區中心點X <span class="sc">==</span> <span class="st">"None"</span> <span class="sc">|</span> 最小統計區中心點Y <span class="sc">==</span> <span class="st">"None"</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(dengue_None)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 14
+Columns: 4
+$ 發病日            &lt;date&gt; 2023-08-18, 2023-08-24, 2023-09-15, 2023-09-15, 202…
+$ 最小統計區中心點X &lt;chr&gt; "None", "None", "None", "None", "None", "None", "Non…
+$ 最小統計區中心點Y &lt;chr&gt; "None", "None", "None", "None", "None", "None", "Non…
+$ EPIWEEK           &lt;dbl&gt; 33, 34, 37, 37, 38, 38, 39, 39, 39, 42, 42, 43, 43, …</code></pre>
+</div>
+</div>
+<p>It is shown that there are a total of 14 rows that have missing coordinates. This is a very small portion of the dataset. As such, let us just remove the 14 rows from the dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>dengue <span class="ot">&lt;-</span> dengue <span class="sc">|&gt;</span> </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(最小統計區中心點X <span class="sc">!=</span> <span class="st">"None"</span> <span class="sc">|</span> 最小統計區中心點Y <span class="sc">!=</span> <span class="st">"None"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="change-the-data-type-of-the-x-and-y-coordinates" class="level3">
+<h3 class="anchored" data-anchor-id="change-the-data-type-of-the-x-and-y-coordinates">Change the Data Type of the x and y coordinates</h3>
+<p>When we look at the <code>glimpse()</code> of the dengue dataframe, the type of data for the x and y coordinates are &lt;chr&gt;.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(dengue)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 25,461
+Columns: 4
+$ 發病日            &lt;date&gt; 2023-07-30, 2023-07-30, 2023-07-30, 2023-07-30, 202…
+$ 最小統計區中心點X &lt;chr&gt; "120.220182286", "120.218036763", "120.235449178", "…
+$ 最小統計區中心點Y &lt;chr&gt; "22.976075790", "22.980068070", "23.013736726", "23.…
+$ EPIWEEK           &lt;dbl&gt; 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, …</code></pre>
+</div>
+</div>
+<p>As such, we need to change these columns into a numerical type or &lt;dbl&gt; using the <code>mutate_at()</code> and <code>as.numeric()</code> function.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>dengue <span class="ot">&lt;-</span> dengue <span class="sc">|&gt;</span> </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_at</span>(<span class="fu">c</span>(<span class="st">'最小統計區中心點X'</span>, <span class="st">'最小統計區中心點Y'</span>),as.numeric)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(dengue)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 25,461
+Columns: 4
+$ 發病日            &lt;date&gt; 2023-07-30, 2023-07-30, 2023-07-30, 2023-07-30, 202…
+$ 最小統計區中心點X &lt;dbl&gt; 120.2202, 120.2180, 120.2354, 120.2456, 120.2465, 12…
+$ 最小統計區中心點Y &lt;dbl&gt; 22.97608, 22.98007, 23.01374, 23.01932, 23.01821, 23…
+$ EPIWEEK           &lt;dbl&gt; 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, …</code></pre>
+</div>
+</div>
+</section>
+<section id="change-the-dengue-dataset-into-sf" class="level3">
+<h3 class="anchored" data-anchor-id="change-the-dengue-dataset-into-sf">Change the Dengue Dataset into sf</h3>
+<p>To know where the coordinate of the dengue cases lies on the map, we need to change the dengue dataset into a sf object to get the point data of each dengue case. However, we need to ensure that the projection system of the Tainan geospatial data and the dengue dataset are the same. As such, let us take a look at the projection system that is used by the Tainan dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(tainan)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Coordinate Reference System:
+  User input: TWD97 
+  wkt:
+GEOGCRS["TWD97",
+    DATUM["Taiwan Datum 1997",
+        ELLIPSOID["GRS 1980",6378137,298.257222101,
+            LENGTHUNIT["metre",1]]],
+    PRIMEM["Greenwich",0,
+        ANGLEUNIT["degree",0.0174532925199433]],
+    CS[ellipsoidal,2],
+        AXIS["geodetic latitude (Lat)",north,
+            ORDER[1],
+            ANGLEUNIT["degree",0.0174532925199433]],
+        AXIS["geodetic longitude (Lon)",east,
+            ORDER[2],
+            ANGLEUNIT["degree",0.0174532925199433]],
+    USAGE[
+        SCOPE["Horizontal component of 3D system."],
+        AREA["Taiwan, Republic of China - onshore and offshore - Taiwan Island, Penghu (Pescadores) Islands."],
+        BBOX[17.36,114.32,26.96,123.61]],
+    ID["EPSG",3824]]</code></pre>
+</div>
+</div>
+<p>Now we know that the Tainan geospatial data is set on the TWD97 with EPSG:3824. So, let’s use <code>st_as_sf()</code> function to change the dengue dataset into a sf object and use <code>st_transform()</code> to change the projection to EPSG:3824.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>dengue_sf <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(dengue,</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>                        <span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"最小統計區中心點X"</span>, <span class="st">"最小統計區中心點Y"</span>),</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>                        <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">|&gt;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">3824</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(dengue_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Coordinate Reference System:
+  User input: EPSG:3824 
+  wkt:
+GEOGCRS["TWD97",
+    DATUM["Taiwan Datum 1997",
+        ELLIPSOID["GRS 1980",6378137,298.257222101,
+            LENGTHUNIT["metre",1]]],
+    PRIMEM["Greenwich",0,
+        ANGLEUNIT["degree",0.0174532925199433]],
+    CS[ellipsoidal,2],
+        AXIS["geodetic latitude (Lat)",north,
+            ORDER[1],
+            ANGLEUNIT["degree",0.0174532925199433]],
+        AXIS["geodetic longitude (Lon)",east,
+            ORDER[2],
+            ANGLEUNIT["degree",0.0174532925199433]],
+    USAGE[
+        SCOPE["Horizontal component of 3D system."],
+        AREA["Taiwan, Republic of China - onshore and offshore - Taiwan Island, Penghu (Pescadores) Islands."],
+        BBOX[17.36,114.32,26.96,123.61]],
+    ID["EPSG",3824]]</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="geospatial-data-1" class="level2">
+<h2 class="anchored" data-anchor-id="geospatial-data-1">Geospatial Data</h2>
+<section id="inspect-and-narrow-down-the-area-of-focus" class="level3">
+<h3 class="anchored" data-anchor-id="inspect-and-narrow-down-the-area-of-focus">Inspect and Narrow Down the Area of Focus</h3>
+<p>First, let’s see what the Tainan dataset looks like.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">qtm</span>(tainan)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex02_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>The plot shows the map of the whole Tainan City. However, we want to focus more on the villages and are confined to the D01, D02, D04, D06, D07, D08, D32 and D39 counties of Tainan City.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>tainan <span class="ot">&lt;-</span> tainan <span class="sc">|&gt;</span> </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(TOWNID <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">'D01'</span>, <span class="st">'D02'</span>, <span class="st">'D04'</span>, <span class="st">'D06'</span>, <span class="st">'D07'</span>, <span class="st">'D08'</span>, <span class="st">'D32'</span>, <span class="st">'D39'</span>))</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">qtm</span>(tainan)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex02_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(tainan) <span class="sc">+</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(<span class="at">col=</span><span class="st">"TOWNID"</span>) <span class="sc">+</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex02_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="setting-the-boundaries" class="level3">
+<h3 class="anchored" data-anchor-id="setting-the-boundaries">Setting the Boundaries</h3>
+<p>Now we have gotten the villages that we want. It is time for us to set the big area boundary to be able to find the dengue cases that are within the area of interest.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>tainan_sf <span class="ot">&lt;-</span> <span class="fu">st_union</span>(tainan)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(tainan_sf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex02_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="combining-aspatial-data-and-geospatial-data" class="level2">
+<h2 class="anchored" data-anchor-id="combining-aspatial-data-and-geospatial-data">Combining Aspatial Data and Geospatial Data</h2>
+<section id="find-dengue-cases-within-the-focus-area" class="level3">
+<h3 class="anchored" data-anchor-id="find-dengue-cases-within-the-focus-area">Find Dengue Cases within the Focus Area</h3>
+<p>Upon further investigation, the data points of the dengue dataset lies all around Taiwan. As such, we need to narrow down the data points into the counties that we have selected.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>dengue_vill_sf <span class="ot">&lt;-</span> <span class="fu">st_intersection</span>(dengue_sf, tainan)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(dengue_vill_sf)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(dengue_vill_sf, <span class="at">file =</span> <span class="st">"rds/dengue_vill_sf.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>dengue_vill_sf <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"rds/dengue_vill_sf.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="exploratory-data-analysis" class="level1">
+<h1>Exploratory Data Analysis</h1>
+<p>Before diving further into finding the global and local spatial autocorrelation, let us take a further look on the distribution of the dengue cases.</p>
+<section id="plot-time-series-graph-on-the-cases" class="level2">
+<h2 class="anchored" data-anchor-id="plot-time-series-graph-on-the-cases">Plot time series graph on the cases</h2>
+<p>Since this is a time-series data and we want to know further about the cases that happened over the course of the year, let us plot the time-series graph.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>dengue_time <span class="ot">&lt;-</span> dengue <span class="sc">|&gt;</span> </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(發病日) <span class="sc">|&gt;</span> </span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>())</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(dengue_time)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 140
+Columns: 2
+$ 發病日 &lt;date&gt; 2023-07-30, 2023-07-31, 2023-08-01, 2023-08-02, 2023-08-03, 20…
+$ n      &lt;int&gt; 23, 42, 45, 45, 49, 49, 58, 65, 77, 69, 67, 56, 79, 72, 71, 74,…</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(dengue_time, <span class="fu">aes</span>(<span class="at">x =</span> 發病日, <span class="at">y =</span> n)) <span class="sc">+</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex02_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>As we can see in the graph, the dengue cases mostly happen between September to mid-November, with it’s peak in October. This may be due to the rainy season in October, such that there are plenty of spaces for the Aides aegypti mosquitos to breed. We will further inspect whether the dengue cases is dependent on time.</p>
+</section>
+<section id="plot-heat-map-on-the-graph-to-see-the-area-that-is-concentrated-on-having-the-dengue-cases" class="level2">
+<h2 class="anchored" data-anchor-id="plot-heat-map-on-the-graph-to-see-the-area-that-is-concentrated-on-having-the-dengue-cases">Plot heat map on the graph to see the area that is concentrated on having the dengue cases</h2>
+<p>Next, let take a look at the distribution of the location where the dengue cases are happening. We can plot the points of the cases in the Tainan map.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(tainan_sf) <span class="sc">+</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>() <span class="sc">+</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>() <span class="sc">+</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(dengue_vill_sf) <span class="sc">+</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_dots</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex02_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>As we can see from the plot above, most of the cases are happening in the central of map, meaning that the spread of the dengue cases may be location-based.</p>
+<p>From the two speculations made above, let us further analyse whether there are any spatial and spatio-temporal relationship of the dengue cases.</p>
+</section>
+</section>
+<section id="global-measures-of-spatial-autocorrelation" class="level1">
+<h1>Global Measures of Spatial Autocorrelation</h1>
+<p>First of all, before we start with the global spatial autocorrelation, we need to find the number of dengue cases in each village.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>dengue_village <span class="ot">&lt;-</span> <span class="fu">st_join</span>(tainan, dengue_sf) <span class="sc">|&gt;</span> </span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(VILLCODE) <span class="sc">|&gt;</span> </span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">num_cases =</span> <span class="fu">n</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="computing-continguity-spatial-weights-and-create-row-standardised-weights-matrix" class="level2">
+<h2 class="anchored" data-anchor-id="computing-continguity-spatial-weights-and-create-row-standardised-weights-matrix">Computing Continguity Spatial Weights and create row-standardised weights matrix</h2>
+<p>After finding the number of cases in each village, we need to compute the spatial weights matrix. We will use the <code>st_contiguity()</code> function to compute the contiguity spatial weights and the <code>st_weights()</code> function to create the row-standardised weights matrix.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>wm_q <span class="ot">&lt;-</span> dengue_village <span class="sc">|&gt;</span> </span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">nb =</span> <span class="fu">st_contiguity</span>(geometry), </span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">wt =</span> <span class="fu">st_weights</span>(nb,</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>                         <span class="at">style =</span> <span class="st">"W"</span>), </span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">.before =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>With the spatial weights matrix, we can now compute the global spatial autocorrelation statistics.</p>
+</section>
+<section id="morans-i" class="level2">
+<h2 class="anchored" data-anchor-id="morans-i">Moran’s I</h2>
+<section id="morans-i-test" class="level3">
+<h3 class="anchored" data-anchor-id="morans-i-test">Moran’s I test</h3>
+<p>Now, let’s compute the Moran’s I using the <code>global_moran()</code> function from the <code>sfdep</code> package. We will use the <code>num_cases</code> as the attribute data, <code>nb</code> as the spatial weights matrix, and <code>wt</code> as the row-standardised weights matrix.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>moran <span class="ot">&lt;-</span> <span class="fu">global_moran_test</span>(wm_q<span class="sc">$</span>num_cases,</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>                  wm_q<span class="sc">$</span>nb,</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>                  wm_q<span class="sc">$</span>wt)</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>moran</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Moran I test under randomisation
+
+data:  x  
+weights: listw    
+
+Moran I statistic standard deviate = 12.867, p-value &lt; 2.2e-16
+alternative hypothesis: greater
+sample estimates:
+Moran I statistic       Expectation          Variance 
+      0.468299777      -0.003891051       0.001346736 </code></pre>
+</div>
+</div>
+<p>As we can see from the result, the Moran’s I value is 0.46830, which is positive, and a very small p-value, which is lower than 2.2e-16. This means that there is a positive spatial correlation between the dengue cases in the villages in Tainan City. Moreover, the expectation of the Moran I statistic when there is no spatial correlation is lower than the Moran I statistic, indicating that there is spatial clustering. However, this is only one test that we did, such that this result might be random and not a representative of the actual spatial autocorrelation. As such, we need to do a Monte Carlo simulation to test the significance of the Moran’s I value.</p>
+</section>
+<section id="monte-carlo-morans-i" class="level3">
+<h3 class="anchored" data-anchor-id="monte-carlo-morans-i">Monte Carlo Moran’s I</h3>
+<p>Now, let’s compute the Moran’s I using the <code>global_moran_perm()</code> function from the <code>sfdep</code> package. We will set a number of 999 for the number of simulations.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">19</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>mperm <span class="ot">&lt;-</span> <span class="fu">global_moran_perm</span>(wm_q<span class="sc">$</span>num_cases,</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>                  wm_q<span class="sc">$</span>nb,</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>                  wm_q<span class="sc">$</span>wt,</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">nsim =</span> <span class="dv">999</span>)</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>mperm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Monte-Carlo simulation of Moran I
+
+data:  x 
+weights: listw  
+number of simulations + 1: 1000 
+
+statistic = 0.4683, observed rank = 1000, p-value &lt; 2.2e-16
+alternative hypothesis: two.sided</code></pre>
+</div>
+</div>
+<p>From the result above, we can see that the statistic value is equal to the first test that we did and it is ranked as the 1000 observed values. This means that the observation has the highest Moran I value from the 999 randomly simulated observations. The very low p-value of 2.2e-16 also signifies that our previous claim is justified, that there is a positive spatial autocorrelation for the dengue cases in the villages of Tainan City.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(mperm<span class="sc">$</span>res, </span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">freq=</span><span class="cn">TRUE</span>, </span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">breaks=</span><span class="dv">30</span>, </span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab=</span><span class="st">"Simulated Moran's I"</span>)</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v=</span><span class="dv">0</span>, </span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">col=</span><span class="st">"red"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex02_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="local-spatial-autocorrelation" class="level1">
+<h1>Local Spatial Autocorrelation</h1>
+<p>From the Gloval Spatial Autocorrelation analysis using Moran’s I, we know that there is a positive spatial autocorrelation for the dengue cases and there are clustering. Now, using the local spatial autocorrelation, we can further investigate which villages are the hotspots and which are the coldspots.</p>
+<section id="computing-distance-matrix" class="level2">
+<h2 class="anchored" data-anchor-id="computing-distance-matrix">Computing Distance Matrix</h2>
+<p>Similar to Global Spatial Autocorrelation, we need to compute the weights matrix, but this time, we use the distance. We will use the <code>st_inverse_distance()</code> function from the <code>sfdep</code> package to compute the inverse distance weights. It computes the inverse of the distance between the centroids of the villages, such that villages that are closer together are assumed to be more likely to have similar number of dengue cases, giving them higher weights.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>cent_coords <span class="ot">&lt;-</span> <span class="fu">st_centroid</span>(dengue_village<span class="sc">$</span>geometry) <span class="sc">|&gt;</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_coordinates</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>wm_q <span class="ot">&lt;-</span> dengue_village <span class="sc">|&gt;</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">nb =</span> <span class="fu">st_contiguity</span>(geometry),</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">wt =</span> <span class="fu">st_inverse_distance</span>(nb, cent_coords,</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">scale =</span> <span class="dv">1</span>),</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">.before =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="computing-local-getis-ord-gi" class="level2">
+<h2 class="anchored" data-anchor-id="computing-local-getis-ord-gi">Computing Local Getis-Ord Gi*</h2>
+<p>Now, let’s compute the local Getis-Ord Gi* statistic using the <code>local_gstar_perm()</code> function from the <code>sfdep</code> package. We will use the distance matrix found in the previous part and set the number of simulations to 999 to find the significance of the local Gi* statistic.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>hcsa <span class="ot">&lt;-</span> wm_q <span class="sc">|&gt;</span> </span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">local_gi =</span> <span class="fu">local_gstar_perm</span>(</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    num_cases, nb, wt, <span class="at">nsim=</span><span class="dv">999</span>),</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">.before =</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(local_gi) <span class="sc">|&gt;</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(gi_star, p_sim, VILLCODE, num_cases) <span class="sc">|&gt;</span></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">p_sim =</span> <span class="fu">replace</span>(p_sim, p_sim <span class="sc">&gt;</span> <span class="fl">0.05</span>, <span class="cn">NA</span>),</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">gi_star =</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(p_sim), <span class="cn">NA</span>, gi_star))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="visualizing-the-local-getis-ord-gi" class="level2">
+<h2 class="anchored" data-anchor-id="visualizing-the-local-getis-ord-gi">Visualizing the Local Getis-Ord Gi*</h2>
+<p>Now, let’s visualize the local Getis-Ord Gi* statistic using the <code>tm_shape()</code> and <code>tm_fill()</code> functions from the <code>tmap</code> package. We will use the <code>gi_star</code> as the attribute data and the <code>p_sim</code> as the significance level.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(hcsa) <span class="sc">+</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="st">"gi_star"</span>, </span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">palette =</span> <span class="st">"-RdYlBu"</span>,</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">style =</span> <span class="st">"cont"</span>,</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">title =</span> <span class="st">"Local Getis-Ord Gi*"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex02_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>As seen from the plot above, the red areas are the hotspots, meaning that the number of dengue cases in the village is high, and so are the surrounding villages. On the other hand, the blue areas indicate villages that have low dengue cases and is surrounded by villages that also have low dengue cases.</p>
+<p>We can also see that most of the coldspots are situated on the outer part of the city, away from the city center. This might be because there are fewer people living in these parts of the city with greater land area, such that the mosquitos have fewer hosts to bite and breed. On the other hand, the hotspots are situated near the city center, where there are more people living in a smaller land area, such that the mosquitos have more hosts to bite and breed. However, it is surprising that the city center itself is not a hotspot. This might be due to the fact that the city center is more developed and has better infrastructure, especially good drainage systems, such that the mosquitos have fewer places to breed.</p>
+</section>
+</section>
+<section id="emerging-hotspot-analysis" class="level1">
+<h1>Emerging Hotspot Analysis</h1>
+<section id="data-preparation" class="level2">
+<h2 class="anchored" data-anchor-id="data-preparation">Data Preparation</h2>
+<section id="create-empty-dataframe" class="level3">
+<h3 class="anchored" data-anchor-id="create-empty-dataframe">Create empty dataframe</h3>
+<p>We need to create an empty dataframe containing all the possible combinations of the village code and the epidemiology week. This is so that the dimension of our dataframe will suit the criterias for a spacetime cube.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>vill_code_unique <span class="ot">&lt;-</span> <span class="fu">unique</span>(tainan<span class="sc">$</span>VILLCODE)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>epiwk_unique <span class="ot">&lt;-</span> <span class="fu">unique</span>(dengue<span class="sc">$</span>EPIWEEK)</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>dengue_empty <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">VILLCODE =</span> vill_code_unique, <span class="at">EPIWEEK =</span> epiwk_unique) <span class="sc">|&gt;</span> </span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">VILLCODE =</span> <span class="fu">as.character</span>(VILLCODE))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="combine-the-sf-objects-to-find-cases-in-each-village" class="level3">
+<h3 class="anchored" data-anchor-id="combine-the-sf-objects-to-find-cases-in-each-village">Combine the sf objects to find cases in each village</h3>
+<p>We then filter the dengue cases by using the <code>st_join()</code> function from the <code>sf</code> package to make sure that all the cases are located within our interested boundery. We will use the <code>st_contains</code> as the join argument to find the cases that are within the area of interest.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>dengue_vill <span class="ot">&lt;-</span> <span class="fu">st_join</span>(tainan, dengue_sf, <span class="at">join=</span>st_contains)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>dengue_vill_summ <span class="ot">&lt;-</span> dengue_vill <span class="sc">|&gt;</span> </span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(VILLNAME, VILLCODE, TOWNID, EPIWEEK) <span class="sc">|&gt;</span> </span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">num_cases =</span> <span class="fu">n</span>())</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(dengue_vill, <span class="st">"rds/dengue_vill.rds"</span>)</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(dengue_vill_summ, <span class="st">"rds/dengue_vill_summ.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>dengue_vill <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"rds/dengue_vill.rds"</span>)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>dengue_vill_summ <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"rds/dengue_vill_summ.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="create-dataframe-to-compile-all-the-number-of-cases-in-each-village-per-week" class="level3">
+<h3 class="anchored" data-anchor-id="create-dataframe-to-compile-all-the-number-of-cases-in-each-village-per-week">Create dataframe to compile all the number of cases in each village per week</h3>
+<p>Next, we use ‘left_join()’ to join the empty dataframe with the dengue cases dataframe. Then, we use ‘mutate()’ to replace the NA values with 0.</p>
+<p>We also drop the geometry column from the dengue_vill_summ dataframe as we only require the attribute data to make the dengue data frame.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>dengue_df <span class="ot">&lt;-</span> <span class="fu">st_drop_geometry</span>(dengue_vill_summ)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>dengue_df <span class="ot">&lt;-</span> <span class="fu">left_join</span>(dengue_empty, dengue_df, <span class="at">by=</span><span class="fu">c</span>(<span class="st">"VILLCODE"</span> <span class="ot">=</span> <span class="st">"VILLCODE"</span>, <span class="st">"EPIWEEK"</span> <span class="ot">=</span> <span class="st">"EPIWEEK"</span>))</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>dengue_df <span class="ot">&lt;-</span> dengue_df <span class="sc">|&gt;</span> </span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(VILLCODE, VILLNAME, TOWNID, EPIWEEK, num_cases) <span class="sc">|&gt;</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">num_cases =</span> <span class="fu">replace_na</span>(num_cases, <span class="dv">0</span>))</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>tainan_village <span class="ot">&lt;-</span> tainan <span class="sc">|&gt;</span> </span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(VILLCODE, VILLNAME, TOWNID)</span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>dengue_df <span class="ot">&lt;-</span> <span class="fu">rows_patch</span>(dengue_df, tainan_village, <span class="at">by=</span><span class="fu">c</span>(<span class="st">"VILLCODE"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="create-spacetime-object" class="level3">
+<h3 class="anchored" data-anchor-id="create-spacetime-object">Create spacetime object</h3>
+<p>To create the spacetime object, we use the <code>spacetime()</code> function from the <code>sfdep</code> package. We will use the <code>dengue_df</code> as the data, <code>tainan</code> as the geometry, <code>VILLCODE</code> as the location column, and <code>EPIWEEK</code> as the time column. We also need to make sure that the location and time columns are inside the dataframe and the geometry dataset.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>dengue_st <span class="ot">&lt;-</span> <span class="fu">spacetime</span>(</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">.data =</span> dengue_df, </span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">.geometry =</span> tainan, </span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">.loc_col =</span> <span class="st">"VILLCODE"</span>, </span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">.time_col =</span> <span class="st">"EPIWEEK"</span></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="activate-the-spacetime-object-into-data" class="level3">
+<h3 class="anchored" data-anchor-id="activate-the-spacetime-object-into-data">Activate the spacetime object into data</h3>
+<p>To see what the spacetime object is like and what it contains, we can activate the spactime object into data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">activate</span>(dengue_st, <span class="st">"data"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(dengue_st)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 5,160
+Columns: 5
+$ VILLCODE  &lt;chr&gt; "67000350032", "67000270011", "67000370005", "67000330004", …
+$ VILLNAME  &lt;chr&gt; "青草里", "保安里", "赤嵌里", "大成里", "城北里", "城南里", …
+$ TOWNID    &lt;chr&gt; "D06", "D32", "D08", "D02", "D06", "D06", "D08", "D06", "D06…
+$ EPIWEEK   &lt;dbl&gt; 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, …
+$ num_cases &lt;int&gt; 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 2, 34, 2,…</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="emerging-hotspot-analysis-1" class="level2">
+<h2 class="anchored" data-anchor-id="emerging-hotspot-analysis-1">Emerging Hotspot Analysis</h2>
+<section id="check-for-time-series-cube" class="level3">
+<h3 class="anchored" data-anchor-id="check-for-time-series-cube">Check for time-series cube</h3>
+<p>Before we can do the emerging hotspot analysis, we need to check if the spacetime object is a spacetime cube.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is_spacetime_cube</span>(dengue_st)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
+</section>
+<section id="computing-spatial-weights" class="level3">
+<h3 class="anchored" data-anchor-id="computing-spatial-weights">Computing Spatial Weights</h3>
+<p>Now, we compute the spatial weights using the <code>st_contiguity()</code> function from the <code>sfdep</code> package. We will use the <code>include_self()</code> function to include itself in the spatial weights, and the <code>st_inverse_distance()</code> function to compute the inverse distance weights, as we assume that the neighbouring areas are more similar to each other.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>coords_center <span class="ot">&lt;-</span> <span class="fu">st_centroid</span>(dengue_village<span class="sc">$</span>geometry) <span class="sc">|&gt;</span> </span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_coordinates</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>dengue_nb <span class="ot">&lt;-</span> dengue_st <span class="sc">|&gt;</span></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">activate</span>(<span class="st">"geometry"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">nb =</span> <span class="fu">include_self</span>(<span class="fu">st_contiguity</span>(geometry)),</span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">wt =</span> <span class="fu">st_inverse_distance</span>(nb, coords_center,</span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">scale =</span> <span class="dv">1</span>,</span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">alpha =</span> <span class="dv">1</span>),</span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">.before =</span> <span class="dv">1</span>) <span class="sc">|&gt;</span>  </span>
+<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_wts</span>(<span class="st">"wt"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb49-13"><a href="#cb49-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_nbs</span>(<span class="st">"nb"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="computing-local-gi" class="level3">
+<h3 class="anchored" data-anchor-id="computing-local-gi">Computing local Gi*</h3>
+<p>Next, we compute the local Gi* for each week using the <code>local_gstar_perm()</code> function from the <code>sfdep</code> package. We will also set the number of simulations to 999.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>gi_star_ehsa <span class="ot">&lt;-</span> dengue_nb <span class="sc">|&gt;</span> </span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(EPIWEEK) <span class="sc">|&gt;</span></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">gi_star =</span> <span class="fu">local_gstar_perm</span>(</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>    num_cases, nb, wt, <span class="at">nsim=</span><span class="dv">999</span>),</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">.before =</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(gi_star)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="mann-kendall-test" class="level3">
+<h3 class="anchored" data-anchor-id="mann-kendall-test">Mann-Kendall Test</h3>
+<p>We then use the Mann-Kendall test to check for the monotonic trend in the series. However, we need to define the null and alternative hypothesis first and set the significance level.</p>
+<ul>
+<li><p>H0: There is no monotonic trend in the series</p></li>
+<li><p>H1: A trend exists, can be positive, negative, or non-null</p></li>
+<li><p>Significance level: 0.05</p></li>
+</ul>
+</section>
+<section id="selecting-study-area" class="level3">
+<h3 class="anchored" data-anchor-id="selecting-study-area">Selecting Study Area</h3>
+<p>For this analysis, we will focus on selecting 3 villages from different TOWNID to see the different trends across the area of interest.</p>
+<p>First, we select the top 5 Towns with the highest number of cases in the first, middle, and last week of the timeframe.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>dengue_df <span class="sc">|&gt;</span> </span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(EPIWEEK <span class="sc">==</span> <span class="dv">31</span>) <span class="sc">|&gt;</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(TOWNID) <span class="sc">|&gt;</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">tot_cases =</span> <span class="fu">sum</span>(num_cases)) <span class="sc">|&gt;</span></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">top_n</span>(<span class="dv">5</span>, tot_cases) <span class="sc">|&gt;</span></span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(tot_cases)) <span class="sc">|&gt;</span></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(TOWNID)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "D39" "D01" "D06" "D32" "D04"</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>dengue_df <span class="sc">|&gt;</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(EPIWEEK <span class="sc">==</span> <span class="dv">40</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(TOWNID) <span class="sc">|&gt;</span></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">tot_cases =</span> <span class="fu">sum</span>(num_cases)) <span class="sc">|&gt;</span></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">top_n</span>(<span class="dv">5</span>, <span class="st">`</span><span class="at">tot_cases</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="st">`</span><span class="at">tot_cases</span><span class="st">`</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(TOWNID)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "D01" "D02" "D04" "D06" "D39"</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>dengue_df <span class="sc">|&gt;</span> </span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(EPIWEEK <span class="sc">==</span> <span class="dv">47</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(TOWNID) <span class="sc">|&gt;</span></span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">tot_cases =</span> <span class="fu">sum</span>(num_cases)) <span class="sc">|&gt;</span></span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">top_n</span>(<span class="dv">5</span>, <span class="st">`</span><span class="at">tot_cases</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="st">`</span><span class="at">tot_cases</span><span class="st">`</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(TOWNID)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "D01" "D04" "D39" "D02" "D32"</code></pre>
+</div>
+</div>
+<p>We can see that the cases in towns D39, D04, and D01 are the highest in the first, middle, and last week of the timeframe.</p>
+<p>So, let’s us take a look closer on the villages that are within the towns D39, D04, and D01.</p>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">D39</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">D04</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-3" role="tab" aria-controls="tabset-1-3" aria-selected="false">D01</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>dengue_df <span class="sc">|&gt;</span> </span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(EPIWEEK <span class="sc">==</span> <span class="dv">31</span> <span class="sc">&amp;</span> TOWNID <span class="sc">==</span> <span class="st">"D39"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">top_n</span>(<span class="dv">5</span>, <span class="st">`</span><span class="at">num_cases</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="st">`</span><span class="at">num_cases</span><span class="st">`</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(VILLNAME)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "五王里" "勝利里" "二王里" "復華里" "崑山里" "東橋里" "三合里" "六合里"</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>dengue_df <span class="sc">|&gt;</span> </span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(EPIWEEK <span class="sc">==</span> <span class="dv">40</span> <span class="sc">&amp;</span> TOWNID <span class="sc">==</span> <span class="st">"D39"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">top_n</span>(<span class="dv">5</span>, <span class="st">`</span><span class="at">num_cases</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="st">`</span><span class="at">num_cases</span><span class="st">`</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(VILLNAME)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "復華里" "勝利里" "二王里" "中華里" "六合里"</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>dengue_df <span class="sc">|&gt;</span> </span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(EPIWEEK <span class="sc">==</span> <span class="dv">50</span> <span class="sc">&amp;</span> TOWNID <span class="sc">==</span> <span class="st">"D39"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">top_n</span>(<span class="dv">5</span>, <span class="st">`</span><span class="at">num_cases</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="st">`</span><span class="at">num_cases</span><span class="st">`</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb61-5"><a href="#cb61-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(VILLNAME)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "東橋里" "西灣里" "三合里" "二王里" "塩行里" "塩興里"</code></pre>
+</div>
+</div>
+<p>We can see here that the number of cases in the 二王里 village of D39 keeps being in the top 5 most number of dengue cases. So, we are interested in finding more on the trend of the dengue cases for this village.</p>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>dengue_df <span class="sc">|&gt;</span> </span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(EPIWEEK <span class="sc">==</span> <span class="dv">31</span> <span class="sc">&amp;</span> TOWNID <span class="sc">==</span> <span class="st">"D04"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">top_n</span>(<span class="dv">5</span>, <span class="st">`</span><span class="at">num_cases</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="st">`</span><span class="at">num_cases</span><span class="st">`</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(VILLNAME)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "公園里" "成德里" "大豐里" "北門里" "元寶里" "合興里" "振興里"</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>dengue_df <span class="sc">|&gt;</span> </span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(EPIWEEK <span class="sc">==</span> <span class="dv">40</span> <span class="sc">&amp;</span> TOWNID <span class="sc">==</span> <span class="st">"D04"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">top_n</span>(<span class="dv">5</span>, <span class="st">`</span><span class="at">num_cases</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
+<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="st">`</span><span class="at">num_cases</span><span class="st">`</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(VILLNAME)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "大港里" "大豐里" "北門里" "大和里" "大興里" "小北里"</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>dengue_df <span class="sc">|&gt;</span> </span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(EPIWEEK <span class="sc">==</span> <span class="dv">50</span> <span class="sc">&amp;</span> TOWNID <span class="sc">==</span> <span class="st">"D04"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">top_n</span>(<span class="dv">5</span>, <span class="st">`</span><span class="at">num_cases</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="st">`</span><span class="at">num_cases</span><span class="st">`</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(VILLNAME)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "公園里" "北門里" "中樓里" "正覺里" "小北里" "力行里" "開元里" "振興里"
+[9] "文元里"</code></pre>
+</div>
+</div>
+<p>The village 北門里 of D04 is the only village that keeps being in the top 5 most number of dengue cases. As such, we want to know more about the trend of the dengue cases happening in this village.</p>
+</div>
+<div id="tabset-1-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-3-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>dengue_df <span class="sc">|&gt;</span> </span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(EPIWEEK <span class="sc">==</span> <span class="dv">31</span> <span class="sc">&amp;</span> TOWNID <span class="sc">==</span> <span class="st">"D01"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">top_n</span>(<span class="dv">5</span>, <span class="st">`</span><span class="at">num_cases</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
+<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="st">`</span><span class="at">num_cases</span><span class="st">`</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb69-5"><a href="#cb69-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(VILLNAME)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "崇學里" "德光里" "崇德里" "大智里" "崇善里"</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>dengue_df <span class="sc">|&gt;</span> </span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(EPIWEEK <span class="sc">==</span> <span class="dv">40</span> <span class="sc">&amp;</span> TOWNID <span class="sc">==</span> <span class="st">"D01"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">top_n</span>(<span class="dv">5</span>, <span class="st">`</span><span class="at">num_cases</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
+<span id="cb71-4"><a href="#cb71-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="st">`</span><span class="at">num_cases</span><span class="st">`</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb71-5"><a href="#cb71-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(VILLNAME)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "自強里" "東明里" "新東里" "莊敬里" "裕農里"</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>dengue_df <span class="sc">|&gt;</span> </span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(EPIWEEK <span class="sc">==</span> <span class="dv">50</span> <span class="sc">&amp;</span> TOWNID <span class="sc">==</span> <span class="st">"D01"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">top_n</span>(<span class="dv">5</span>, <span class="st">`</span><span class="at">num_cases</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
+<span id="cb73-4"><a href="#cb73-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="st">`</span><span class="at">num_cases</span><span class="st">`</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb73-5"><a href="#cb73-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(VILLNAME)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "富強里" "裕聖里" "關聖里" "大智里" "崇文里" "崇成里" "崇明里" "大福里"
+ [9] "崇德里" "大德里" "崇學里" "和平里" "崇善里" "路東里" "虎尾里" "忠孝里"
+[17] "崇信里" "德光里" "復興里" "自強里" "文聖里" "富裕里" "龍山里" "新東里"
+[25] "泉南里" "東聖里" "東安里" "大同里" "衛國里" "裕農里" "南聖里" "崇誨里"
+[33] "東門里" "中西里" "東明里" "圍下里" "東光里" "後甲里" "莊敬里" "小東里"
+[41] "大學里" "成大里" "德高里" "仁和里" "東智里"</code></pre>
+</div>
+</div>
+<p>There are no village that always appear in top 5. However, the village 大智里 of D01 appears in the beginning and at the end, while disappearing in the middle. It is interesting to see how the number of cases changes over the course of the timeframe for this village.</p>
+</div>
+</div>
+</div>
+<p>From the list of villages above, we then choose one village that reflects a similar trend to the number of cases in each town. We will also plot the time series graph of the number of cases in the village and perform the Mann-Kendall test.</p>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">二王里 of D39</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">北門里 of D04</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-3" role="tab" aria-controls="tabset-2-3" aria-selected="false">大智里 of D01</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>erwang_ehsa <span class="ot">&lt;-</span> gi_star_ehsa <span class="sc">|&gt;</span> </span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(VILLNAME <span class="sc">==</span> <span class="st">"二王里"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(VILLNAME, EPIWEEK, gi_star)</span>
+<span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-6"><a href="#cb75-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> erwang_ehsa, </span>
+<span id="cb75-7"><a href="#cb75-7" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> EPIWEEK, </span>
+<span id="cb75-8"><a href="#cb75-8" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> gi_star)) <span class="sc">+</span></span>
+<span id="cb75-9"><a href="#cb75-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb75-10"><a href="#cb75-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_light</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex02_files/figure-html/unnamed-chunk-52-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>erwang_ehsa <span class="sc">|&gt;</span></span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mk =</span> <span class="fu">list</span>(</span>
+<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unclass</span>(</span>
+<span id="cb76-4"><a href="#cb76-4" aria-hidden="true" tabindex="-1"></a>      Kendall<span class="sc">::</span><span class="fu">MannKendall</span>(gi_star)))) <span class="sc">|&gt;</span> </span>
+<span id="cb76-5"><a href="#cb76-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest_wider</span>(mk)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 5
+     tau       sl     S     D  varS
+   &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1 -0.621 0.000147  -118  190.   950</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>beimen_ehsa <span class="ot">&lt;-</span> gi_star_ehsa <span class="sc">|&gt;</span></span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(VILLNAME <span class="sc">==</span> <span class="st">"北門里"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(VILLNAME, EPIWEEK, gi_star)</span>
+<span id="cb78-5"><a href="#cb78-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb78-6"><a href="#cb78-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> beimen_ehsa, </span>
+<span id="cb78-7"><a href="#cb78-7" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> EPIWEEK, </span>
+<span id="cb78-8"><a href="#cb78-8" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> gi_star)) <span class="sc">+</span></span>
+<span id="cb78-9"><a href="#cb78-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb78-10"><a href="#cb78-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_light</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex02_files/figure-html/unnamed-chunk-53-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a>beimen_ehsa <span class="sc">|&gt;</span></span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mk =</span> <span class="fu">list</span>(</span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unclass</span>(</span>
+<span id="cb79-4"><a href="#cb79-4" aria-hidden="true" tabindex="-1"></a>      Kendall<span class="sc">::</span><span class="fu">MannKendall</span>(gi_star)))) <span class="sc">|&gt;</span> </span>
+<span id="cb79-5"><a href="#cb79-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest_wider</span>(mk)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 5
+     tau    sl     S     D  varS
+   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1 0.0947 0.581    18  190.   950</code></pre>
+</div>
+</div>
+</div>
+<div id="tabset-2-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-3-tab">
+<div class="cell">
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a>dazhi_ehsa <span class="ot">&lt;-</span> gi_star_ehsa <span class="sc">|&gt;</span></span>
+<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb81-3"><a href="#cb81-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(VILLNAME <span class="sc">==</span> <span class="st">"大智里"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb81-4"><a href="#cb81-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(VILLNAME, EPIWEEK, gi_star)</span>
+<span id="cb81-5"><a href="#cb81-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb81-6"><a href="#cb81-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> dazhi_ehsa, </span>
+<span id="cb81-7"><a href="#cb81-7" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> EPIWEEK, </span>
+<span id="cb81-8"><a href="#cb81-8" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> gi_star)) <span class="sc">+</span></span>
+<span id="cb81-9"><a href="#cb81-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb81-10"><a href="#cb81-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_light</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex02_files/figure-html/unnamed-chunk-54-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a>dazhi_ehsa <span class="sc">|&gt;</span></span>
+<span id="cb82-2"><a href="#cb82-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mk =</span> <span class="fu">list</span>(</span>
+<span id="cb82-3"><a href="#cb82-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unclass</span>(</span>
+<span id="cb82-4"><a href="#cb82-4" aria-hidden="true" tabindex="-1"></a>      Kendall<span class="sc">::</span><span class="fu">MannKendall</span>(gi_star)))) <span class="sc">|&gt;</span> </span>
+<span id="cb82-5"><a href="#cb82-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest_wider</span>(mk)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 5
+     tau    sl     S     D  varS
+   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1 -0.200 0.230   -38  190.   950</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<section id="analysis" class="level5">
+<h5 class="anchored" data-anchor-id="analysis">Analysis</h5>
+<ul>
+<li><p>二王里 of D39: From the time-series graph, we can see that the number of cases across the weeks decreases. The Mann-Kendall test also shows that there is a significant decreasing trend in the number of cases. As such, we can reject the null hypothesis that there is no monotonic trend in the series and conclude that the rate of dengue cases happening per week decreases over time.</p></li>
+<li><p>北門里 of D04: From the time-series graph, we can see that the number of cases are at a constant high until the end. From the result of the Mann-Kendall test, we can see that there is no significant trend in the number of cases. As such, we cannot reject the null hypothesis and conclude that there is no monotonic trend in the series. This means that the rate of dengue cases happening per week fluctuates and there is no trend in the number of dengue cases.</p></li>
+<li><p>大智里 of D01: From the time-series graph, we can see that the number of cases decreases in the beginning but increases towards the end. True as what the Mann-Kendall test shows, that there is no significant trend in the number of cases. As such, we cannot reject the null hypothesis and conclude that there is no monotonic trend in the series. This means that the number of dengue cases fluctuates from time to time.</p></li>
+</ul>
+</section>
+</section>
+<section id="ehsa-for-all-the-villages" class="level3">
+<h3 class="anchored" data-anchor-id="ehsa-for-all-the-villages">EHSA for all the villages</h3>
+<p>Now, let us do the emerging hotspot analysis for all the villages in Tainan City using the <code>emerging_hostpost_analysis()</code> function from <code>sfdep</code> package.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">19</span>)</span>
+<span id="cb84-2"><a href="#cb84-2" aria-hidden="true" tabindex="-1"></a>ehsa <span class="ot">&lt;-</span> <span class="fu">emerging_hotspot_analysis</span>(<span class="at">x =</span> dengue_st, </span>
+<span id="cb84-3"><a href="#cb84-3" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">.var =</span> <span class="st">"num_cases"</span>, </span>
+<span id="cb84-4"><a href="#cb84-4" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">k =</span> <span class="dv">1</span>, <span class="at">nsim =</span> <span class="dv">99</span>)</span>
+<span id="cb84-5"><a href="#cb84-5" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(ehsa, <span class="st">"rds/ehsa.rds"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a>ehsa <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"rds/ehsa.rds"</span>)</span>
+<span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a><span class="fu">count</span>(ehsa, classification)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>        classification   n
+1 consecutive coldspot   5
+2  consecutive hotspot   7
+3          new hotspot   3
+4  no pattern detected   6
+5  oscilating coldspot  53
+6   oscilating hotspot 110
+7  persistent coldspot   6
+8    sporadic coldspot  36
+9     sporadic hotspot  32</code></pre>
+</div>
+</div>
+<p>The count table shows how many villages are in each classification. We can see that there are 5 villages that are persistent coldspots, 109 villages in the oscilating hotspot, and 1 village as a new coldspot.</p>
+</section>
+<section id="plot-the-result-of-emerging-hotspot-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="plot-the-result-of-emerging-hotspot-analysis">Plot the result of emerging hotspot analysis</h3>
+<p>Let us see the distribution of the different classifications of the villages in Tainan City.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="at">data =</span> ehsa,</span>
+<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> classification)) <span class="sc">+</span></span>
+<span id="cb87-3"><a href="#cb87-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">fill=</span><span class="st">"light blue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex02_files/figure-html/unnamed-chunk-57-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>To see the locations of the different classifications of the villages, we will plot the map of Tainan City and overlay the emerging hotspot analysis result on the map.</p>
+<p>First, we need to combine the emerging hotspot analysis result with the Tainan geospatial data using the <code>left_join()</code> function from the <code>dplyr</code> package. We also need to remove the insignificant rows by replacing the rows that has p-value more than 0.05 with NA.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>tainan_ehsa <span class="ot">&lt;-</span> <span class="fu">left_join</span>(ehsa, tainan, <span class="at">by=</span><span class="fu">c</span>(<span class="st">'location'</span><span class="ot">=</span><span class="st">'VILLCODE'</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb88-2"><a href="#cb88-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">p_value</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">replace</span>(<span class="st">`</span><span class="at">p_value</span><span class="st">`</span>, <span class="st">`</span><span class="at">p_value</span><span class="st">`</span> <span class="sc">&gt;</span> <span class="fl">0.05</span>, <span class="cn">NA</span>), </span>
+<span id="cb88-3"><a href="#cb88-3" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">classification</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(<span class="st">`</span><span class="at">p_value</span><span class="st">`</span>), <span class="cn">NA</span>, <span class="st">`</span><span class="at">classification</span><span class="st">`</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Since the above dataset is still in a dataframe format, we need to change it into a sf object using the <code>st_as_sf()</code> function from the <code>sf</code> package to be able to plot it using the tmap package.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb89"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a>tainan_ehsa_sf <span class="ot">&lt;-</span> tainan_ehsa <span class="sc">|&gt;</span> </span>
+<span id="cb89-2"><a href="#cb89-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(location, tau, p_value, classification, geometry)</span>
+<span id="cb89-3"><a href="#cb89-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb89-4"><a href="#cb89-4" aria-hidden="true" tabindex="-1"></a>ehsa_sf <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(tainan_ehsa_sf)</span>
+<span id="cb89-5"><a href="#cb89-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb89-6"><a href="#cb89-6" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
+<span id="cb89-7"><a href="#cb89-7" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(ehsa_sf) <span class="sc">+</span></span>
+<span id="cb89-8"><a href="#cb89-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(<span class="at">col=</span><span class="st">"classification"</span>, <span class="at">palette=</span><span class="st">"Paired"</span>) <span class="sc">+</span></span>
+<span id="cb89-9"><a href="#cb89-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-home_Ex02_files/figure-html/unnamed-chunk-59-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>From the map above, we can see that most of the villages are oscillating hotspot, meaning that they are statistically significant hotspot at the end of the timeframe although they are statistically significant coldspot at the beginning of the timeframe. Most of these villages are located on the D06 town. This might be because as more mosquitoes breed, the range of reach for these mosquitoes widen, especially to the more rural part of the city.</p>
+<p>In conclusion, based on the analysis, we can say that the dengue cases in Tainan City are spatially and spatio-temporally correlated. As seen from the HCSA, there are hotspot and coldspot clusters identified. Moreover, the ESHA shows that though the number of cases in many of the village fluctuates we can still see a trend to the number of dengue cases happening in each village.</p>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
