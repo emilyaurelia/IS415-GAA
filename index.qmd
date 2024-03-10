@@ -14,6 +14,8 @@ Hands-On Exercise:
 -   [Hands-on Exercise 4](https://is415-gaa-emilyaurelia.netlify.app/hands-on_ex/hands-on_ex04/hands-on_ex04)
 -   [Hands-on Exercise 5](https://is415-gaa-emilyaurelia.netlify.app/hands-on_ex/hands-on_ex05/hands-on_ex05)
 -   [Hands-on Exercise 6](https://is415-gaa-emilyaurelia.netlify.app/hands-on_ex/hands-on_ex06/hands-on_ex06)
+-   [Hands-on Exercise 7](https://is415-gaa-emilyaurelia.netlify.app/hands-on_ex/hands-on_ex07/hands-on_ex07)
+-   [Hands-on Exercise 8](https://is415-gaa-emilyaurelia.netlify.app/hands-on_ex/hands-on_ex08/hands-on_ex08)
 
 In-Class Exercise:
 
@@ -21,6 +23,7 @@ In-Class Exercise:
 -   [In-Class Exercise 3](https://is415-gaa-emilyaurelia.netlify.app/in-class_ex/in-class_ex03/in-class_ex03)
 -   [In-Class Exercise 4](https://is415-gaa-emilyaurelia.netlify.app/in-class_ex/in-class_ex04/in-class_ex04)
 -   [In-Class Exercise 5](https://is415-gaa-emilyaurelia.netlify.app/in-class_ex/in-class_ex05/in-class_ex05)
+-   [In-Class Exercise 6](https://is415-gaa-emilyaurelia.netlify.app/in-class_ex/in-class_ex06/in-class_ex06)
 
 Take Home Exercise:
 
