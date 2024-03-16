@@ -16,6 +16,7 @@ Hands-On Exercise:
 -   [Hands-on Exercise 6](https://is415-gaa-emilyaurelia.netlify.app/hands-on_ex/hands-on_ex06/hands-on_ex06)
 -   [Hands-on Exercise 7](https://is415-gaa-emilyaurelia.netlify.app/hands-on_ex/hands-on_ex07/hands-on_ex07)
 -   [Hands-on Exercise 8](https://is415-gaa-emilyaurelia.netlify.app/hands-on_ex/hands-on_ex08/hands-on_ex08)
+-   [Hands-on Exercise 9](https://is415-gaa-emilyaurelia.netlify.app/hands-on_ex/hands-on_ex09/hands-on_ex09)
 
 In-Class Exercise:
 
