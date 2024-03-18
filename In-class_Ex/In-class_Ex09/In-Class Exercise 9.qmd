@@ -1,0 +1,169 @@
+---
+title: "In-Class Exercise 9: Geographically Weighted Predictive Model"
+author: "Emily Aurelia"
+format:
+  html:
+    toc-depth: 4
+execute: 
+  warning: false #to remove the warning in the webpage
+  freeze: True
+date: "18 March 2024"
+---
+
+```{r}
+pacman::p_load(sf, spdep, GWmodel, SpatialML, tmap, rsample, tidymodels, tidyverse, gtsummary, rpart, rpart.plot, ggstatsplot, performance)
+```
+
+```{r}
+rs_sf <- read_rds("data/rds/HDB_resale.rds")
+```
+
+```{r}
+glimpse(rs_sf)
+```
+Split the train and test data into a 50-50 ratio
+```{r}
+set.seed(1234)
+resale_split <- initial_split(rs_sf, prop=5/10) #will do random sampling, if strata = TRUE, then it is stratified sampling
+train_sf <- training(resale_split)
+test_sf <- testing(resale_split)
+```
+You can save the train and test data as rds and then read it again to save memory space
+
+The models in SpatialML only receives data frames as input, so we need to convert the spatial data into data frames
+```{r}
+train_df <- train_sf |> st_drop_geometry() |> as.data.frame()
+
+test_df <- test_sf |> st_drop_geometry() |> as.data.frame()
+```
+
+```{r}
+rs_sf1 <- rs_sf |> st_drop_geometry()
+ggcorrmat(rs_sf1[,2:17])
+```
+```{r}
+train_df <- train_df |> select(-c(PROX_CHAS))
+train_sf <- train_sf |> select(-c(PROX_CHAS))
+test_df <- test_df |> select(-c(PROX_CHAS))
+test_sf <- test_sf |> select(-c(PROX_CHAS))
+```
+
+
+
+
+```{r}
+rs_mlr <- lm(formula = RESALE_PRICE ~ .,
+                data=train_df)
+```
+
+```{r}
+tbl_regression(rs_mlr, intercept=TRUE)
+```
+
+
+extract out the coordinates to be used for the coordinates pair for the grf.bw() function
+```{r}
+coords <- st_coordinates(rs_sf)
+coords_train <- st_coordinates(train_sf)
+coords_test <- st_coordinates(test_sf)
+```
+
+```{r}
+set.seed(1234)
+rs_rp <- rpart(formula = RESALE_PRICE ~ ., data = train_df)
+
+rs_rp
+```
+
+```{r}
+rpart.plot(rs_rp)
+```
+```{r}
+set.seed(1234)
+rs_rf <- ranger(formula = RESALE_PRICE ~ ., data = train_df, importance = "impurity")
+rs_rf
+```
+To extract the feature importance
+```{r}
+vi <- as.data.frame(rs_rf$variable.importance)
+vi$variables <- rownames(vi)
+vi <- vi |> rename(vi = "rs_rf$variable.importance")
+```
+
+```{r}
+ggplot(data=vi, aes(x = vi, y = reorder(variables, vi))) +
+  geom_bar(stat = "identity") #treat every column as single observation
+```
+```{r}
+ggplot(data = vi) +
+  geom_col(aes(x = vi, y = reorder(variables, vi)))
+```
+
+
+
+The above graph shows that the model work well with the variables provided. However, if the model cannot utilize the variables, your model might suffer from quasi-separation or quasi complete separation problem. This is a problem where the model cannot differentiate between the two classes of the dependent variable. This is a common problem in logistic regression, but it can also happen in other models. 
+
+```{r}
+grf_pred <- read_rds("data/models/grf_pred.rds")
+grf_pred_df <- as.data.frame(grf_pred)
+```
+
+```{r}
+test_pred <- test_df |> select(RESALE_PRICE) |> cbind(grf_pred_df)
+```
+
+```{r}
+rf_pred <- predict(rs_rf, test_df)
+```
+
+```{r}
+rf_pred_df <- as.data.frame(rf_pred$predictions) |> rename(rf_pred = "rf_pred$predictions")
+```
+
+```{r}
+test_pred <- test_pred |> cbind(rf_pred_df)
+```
+
+```{r}
+mlr_pred <- predict(rs_mlr, test_df)
+mlr_pred_df <- as.data.frame(mlr_pred) |> rename(mlr_pred = "mlr_pred")
+test_pred <- cbind(test_pred, mlr_pred_df)
+```
+
+to comparison between the models
+```{r}
+mc <- test_pred |> pivot_longer(cols=c(2:4),
+                                names_to = "models",
+                                values_to = "predicted")
+```
+
+output table to do comparison of the models using the RMSE
+
+```{r}
+mc |> group_by(models) |> yardstick::rmse(RESALE_PRICE, predicted)
+```
+from the output, random forest outperform the multi regression model. The basic non geographic random forest model is better than the geographic random forest model. such that in this use casem just use the rf model because it runs faster than the grf. 
+
+```{r}
+ggplot(data = test_pred,
+       aes(x = grf_pred,
+           y=RESALE_PRICE)) +
+  geom_point()
+```
+
+```{r}
+ggplot(data = test_pred,
+       aes(x = mlr_pred,
+           y=RESALE_PRICE)) +
+  geom_point()
+```
+The outlier is quite big for multiple linear regression such that it has higher rmse than the grf. 
+
+
+
+
+
+
+
+
+

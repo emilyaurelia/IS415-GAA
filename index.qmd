@@ -26,6 +26,7 @@ In-Class Exercise:
 -   [In-Class Exercise 5](https://is415-gaa-emilyaurelia.netlify.app/in-class_ex/in-class_ex05/in-class_ex05)
 -   [In-Class Exercise 6](https://is415-gaa-emilyaurelia.netlify.app/in-class_ex/in-class_ex06/in-class_ex06)
 -   [In-Class Exercise 7](https://is415-gaa-emilyaurelia.netlify.app/in-class_ex/in-class_ex07/in-class_ex07)
+-   [In-Class Exercise 9](https://is415-gaa-emilyaurelia.netlify.app/in-class_ex/in-class_ex09/in-class_ex09)
 
 Take Home Exercise:
 
