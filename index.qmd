@@ -33,4 +33,4 @@ Take Home Exercise:
 
 -   [Take Home Exercise 1](https://is415-gaa-emilyaurelia.netlify.app/take-home_ex/take-home_ex01/take-home_ex01)
 -   [Take Home Exercise 2](https://is415-gaa-emilyaurelia.netlify.app/take-home_ex/take-home_ex02/take-home_ex02)
--   [Take Home Exercise 3](https://is415-gaa-emilyaurelia.netlify.app/take-home_ex/take-home_ex02/take-home_ex02)
+-   [Take Home Exercise 3](https://is415-gaa-emilyaurelia.netlify.app/take-home_ex/take-home_ex03/take-home_ex03)
